@@ -1,0 +1,385 @@
+{
+  "schema": "audi-workbench.dictionary/v1",
+  "description": "English read-only VAG record catalog, unverified MHS2 candidates, and isolated synthetic demo recipes. Optional catalog entries do not expand default captures.",
+  "entries": [
+    {
+      "id": "vag.vin",
+      "name": "VIN",
+      "ecu": "*",
+      "did": "F190",
+      "confidence": "source-confirmed",
+      "source": [
+        "https://github.com/bri3d/VW_Flash/blob/293f46d782bae2ced930497889b71eb782f122cb/lib/constants.py"
+      ],
+      "encoding": "ascii",
+      "writable": false,
+      "category": "Identification",
+      "description": "Vehicle identifier reported by the ECU. The raw bytes, including padding, are retained for exact identity checks.",
+      "read_by_default": true
+    },
+    {
+      "id": "vag.part_number",
+      "name": "VW spare part number",
+      "ecu": "*",
+      "did": "F187",
+      "confidence": "source-confirmed",
+      "source": [
+        "https://github.com/bri3d/VW_Flash/blob/293f46d782bae2ced930497889b71eb782f122cb/lib/constants.py"
+      ],
+      "encoding": "ascii",
+      "writable": false,
+      "category": "Identification",
+      "description": "VAG spare-part identifier reported by the ECU. A matching name alone does not establish feature-map compatibility.",
+      "read_by_default": true
+    },
+    {
+      "id": "vag.sw_version",
+      "name": "Application software version",
+      "ecu": "*",
+      "did": "F189",
+      "confidence": "source-confirmed",
+      "source": [
+        "https://github.com/bri3d/VW_Flash/blob/293f46d782bae2ced930497889b71eb782f122cb/lib/constants.py"
+      ],
+      "encoding": "ascii",
+      "writable": false,
+      "category": "Identification",
+      "description": "Application software version reported by the ECU. This is part of the exact fingerprint for a reviewed write definition.",
+      "read_by_default": true
+    },
+    {
+      "id": "vag.hw_part_number",
+      "name": "ECU hardware part number",
+      "ecu": "*",
+      "did": "F191",
+      "confidence": "source-confirmed",
+      "source": [
+        "https://github.com/bri3d/VW_Flash/blob/293f46d782bae2ced930497889b71eb782f122cb/lib/constants.py"
+      ],
+      "encoding": "ascii",
+      "writable": false,
+      "category": "Identification",
+      "description": "Hardware part identifier reported by the ECU. This is part of the exact fingerprint for a reviewed write definition.",
+      "read_by_default": true
+    },
+    {
+      "id": "vag.hw_version",
+      "name": "Hardware version",
+      "ecu": "*",
+      "did": "F1A3",
+      "confidence": "source-confirmed",
+      "source": [
+        "https://github.com/bri3d/VW_Flash/blob/293f46d782bae2ced930497889b71eb782f122cb/lib/constants.py"
+      ],
+      "encoding": "ascii",
+      "writable": false,
+      "category": "Identification",
+      "description": "Hardware revision reported by the ECU. Displayed as text while preserving the original bytes.",
+      "read_by_default": true
+    },
+    {
+      "id": "vag.system_name",
+      "name": "System name",
+      "ecu": "*",
+      "did": "F197",
+      "confidence": "source-confirmed",
+      "source": [
+        "https://github.com/bri3d/VW_Flash/blob/293f46d782bae2ced930497889b71eb782f122cb/lib/constants.py"
+      ],
+      "encoding": "ascii",
+      "writable": false,
+      "category": "Identification",
+      "description": "System or engine-type name reported by the ECU. Availability depends on the installed controller.",
+      "read_by_default": true
+    },
+    {
+      "id": "vag.asam_name",
+      "name": "ASAM/ODX file identifier",
+      "ecu": "*",
+      "did": "F19E",
+      "confidence": "source-confirmed",
+      "source": [
+        "https://github.com/bri3d/VW_Flash/blob/293f46d782bae2ced930497889b71eb782f122cb/lib/constants.py"
+      ],
+      "encoding": "ascii",
+      "writable": false,
+      "category": "Identification",
+      "description": "ASAM/ODX diagnostic-description identifier. Use it with the software and hardware identity when matching a feature definition.",
+      "read_by_default": true
+    },
+    {
+      "id": "vag.asam_version",
+      "name": "ASAM/ODX file version",
+      "ecu": "*",
+      "did": "F1A2",
+      "confidence": "source-confirmed",
+      "source": [
+        "https://github.com/bri3d/VW_Flash/blob/293f46d782bae2ced930497889b71eb782f122cb/lib/constants.py"
+      ],
+      "encoding": "ascii",
+      "writable": false,
+      "category": "Identification",
+      "description": "ASAM/ODX diagnostic-description version. A definition for a different version must not authorize a write.",
+      "read_by_default": true
+    },
+    {
+      "id": "vag.coding",
+      "name": "VAG coding value (raw; feature map unknown)",
+      "ecu": "5F",
+      "did": "0600",
+      "confidence": "source-confirmed",
+      "source": [
+        "https://github.com/bri3d/VW_Flash/blob/293f46d782bae2ced930497889b71eb782f122cb/lib/constants.py",
+        "https://github.com/kartoffelpflanze/ODIS-project-explorer"
+      ],
+      "writable": false,
+      "category": "Coding",
+      "description": "Raw coding record for 5F. No real MHS2 byte or bit feature layout is verified; this entry is read-only and long live writes are unsupported.",
+      "read_by_default": true
+    },
+    {
+      "id": "mhs2.experimental_22ad",
+      "name": "Experimental candidate 22AD (meaning unverified)",
+      "ecu": "5F",
+      "did": "22AD",
+      "confidence": "unknown",
+      "source": [
+        "User read-only audi_mhs2_ble_probe.py, 2026-10-15; no verified layout or Apple_DIO offset"
+      ],
+      "writable": false,
+      "category": "Experimental",
+      "description": "Read candidate retained from the earlier MHS2 probe. Its meaning and layout are unknown; it does not identify Apple_DIO or CarPlay state.",
+      "read_by_default": true
+    },
+    {
+      "ecu": "5F",
+      "confidence": "demo",
+      "source": [
+        "Synthetic Audi Workbench simulator fixture; not a vehicle coding definition"
+      ],
+      "writable": true,
+      "verification": "locally-verified",
+      "origin": "demo",
+      "applies_to": {
+        "vin": "44454D4F30303030303030303030303031",
+        "part_number": "44454D4F2D35462D50415254",
+        "sw_version": "53494D2D30303031",
+        "hw_part_number": "44454D4F2D35462D4857",
+        "asam_name": "45565F44454D4F5F35465F4F4E4C59",
+        "asam_version": "303030303031"
+      },
+      "tx": 1907,
+      "rx": 2013,
+      "session": null,
+      "security": "none",
+      "evidence": "Deterministic synthetic ECU fixture, verified by simulator tests. No applicability to physical vehicles.",
+      "id": "demo.display",
+      "name": "DEMO ONLY: display settings",
+      "did": "D100",
+      "length": 4,
+      "allowed_mask": "010F0000",
+      "fields": [
+        {
+          "name": "DEMO ONLY: screen animation",
+          "offset": 0,
+          "mask": 1,
+          "values": {
+            "0": "Disabled",
+            "1": "Enabled"
+          }
+        },
+        {
+          "name": "DEMO ONLY: brightness",
+          "offset": 1,
+          "mask": 15,
+          "values": {
+            "0": "0",
+            "1": "1",
+            "2": "2",
+            "3": "3",
+            "4": "4",
+            "5": "5",
+            "6": "6",
+            "7": "7",
+            "8": "8",
+            "9": "9",
+            "10": "10"
+          }
+        }
+      ],
+      "category": "Simulator",
+      "description": "Synthetic four-byte settings record for practicing preview, backup, apply and restore. Its animation and brightness fields do not describe a real Audi controller.",
+      "read_by_default": true
+    },
+    {
+      "ecu": "5F",
+      "confidence": "demo",
+      "source": [
+        "Synthetic Audi Workbench simulator fixture; not a vehicle coding definition"
+      ],
+      "writable": true,
+      "verification": "locally-verified",
+      "origin": "demo",
+      "applies_to": {
+        "vin": "44454D4F30303030303030303030303031",
+        "part_number": "44454D4F2D35462D50415254",
+        "sw_version": "53494D2D30303031",
+        "hw_part_number": "44454D4F2D35462D4857",
+        "asam_name": "45565F44454D4F5F35465F4F4E4C59",
+        "asam_version": "303030303031"
+      },
+      "tx": 1907,
+      "rx": 2013,
+      "session": null,
+      "security": "none",
+      "evidence": "Deterministic synthetic ECU fixture, verified by simulator tests. No applicability to physical vehicles.",
+      "id": "demo.long_coding",
+      "name": "DEMO ONLY: synthetic long coding",
+      "did": "0600",
+      "length": 20,
+      "allowed_mask": "0000000000000000000000000400000000000000",
+      "fields": [
+        {
+          "name": "DEMO ONLY: synthetic long flag",
+          "offset": 12,
+          "mask": 4,
+          "values": {
+            "0": "Disabled",
+            "1": "Enabled"
+          }
+        }
+      ],
+      "category": "Simulator",
+      "description": "Synthetic twenty-byte coding record for exercising a long-value edit and restore in the simulator. This does not establish live outgoing ISO-TP support.",
+      "read_by_default": true
+    },
+    {
+      "id": "vag.serial_number",
+      "name": "ECU serial number",
+      "ecu": "*",
+      "did": "F18C",
+      "confidence": "source-confirmed",
+      "source": [
+        "https://github.com/bri3d/VW_Flash/blob/293f46d782bae2ced930497889b71eb782f122cb/lib/constants.py",
+        "https://github.com/bri3d/VW_Flash/blob/293f46d782bae2ced930497889b71eb782f122cb/lib/flash_uds.py"
+      ],
+      "encoding": "ascii",
+      "writable": false,
+      "read_by_default": false,
+      "category": "Identification",
+      "description": "Serial identifier reported by the controller. This record can contain identifying information; its availability on MHS2 is not yet verified."
+    },
+    {
+      "id": "vag.fazit_id",
+      "name": "FAZIT identifier",
+      "ecu": "*",
+      "did": "F17C",
+      "confidence": "source-confirmed",
+      "source": [
+        "https://github.com/bri3d/VW_Flash/blob/293f46d782bae2ced930497889b71eb782f122cb/lib/constants.py",
+        "https://github.com/bri3d/VW_Flash/blob/293f46d782bae2ced930497889b71eb782f122cb/lib/flash_uds.py"
+      ],
+      "encoding": "ascii",
+      "writable": false,
+      "read_by_default": false,
+      "category": "Identification",
+      "description": "VAG FAZIT identification string reported by the controller. This is optional identifying evidence, not an activation key."
+    },
+    {
+      "id": "vag.active_session",
+      "name": "Active diagnostic session",
+      "ecu": "*",
+      "did": "F186",
+      "confidence": "source-confirmed",
+      "source": [
+        "https://github.com/bri3d/VW_Flash/blob/293f46d782bae2ced930497889b71eb782f122cb/lib/constants.py",
+        "https://github.com/bri3d/VW_Flash/blob/293f46d782bae2ced930497889b71eb782f122cb/lib/flash_uds.py"
+      ],
+      "encoding": "hex",
+      "writable": false,
+      "read_by_default": false,
+      "category": "Diagnostic state",
+      "description": "Record describing the current diagnostic session. Preserved as raw bytes; this catalog does not assume a byte layout or switch sessions."
+    },
+    {
+      "id": "vag.workshop_system_name",
+      "name": "Workshop system name",
+      "ecu": "*",
+      "did": "F1AA",
+      "confidence": "source-confirmed",
+      "source": [
+        "https://github.com/bri3d/VW_Flash/blob/293f46d782bae2ced930497889b71eb782f122cb/lib/constants.py",
+        "https://github.com/bri3d/VW_Flash/blob/293f46d782bae2ced930497889b71eb782f122cb/lib/flash_uds.py"
+      ],
+      "encoding": "ascii",
+      "writable": false,
+      "read_by_default": false,
+      "category": "Identification",
+      "description": "Workshop-facing system-name string reported by the controller. The source names this record, but does not establish that the installed MHS2 provides it."
+    },
+    {
+      "id": "vag.bootloader_id",
+      "name": "Bootloader identifier",
+      "ecu": "*",
+      "did": "F1F4",
+      "confidence": "source-confirmed",
+      "source": [
+        "https://github.com/bri3d/VW_Flash/blob/293f46d782bae2ced930497889b71eb782f122cb/lib/constants.py",
+        "https://github.com/bri3d/VW_Flash/blob/293f46d782bae2ced930497889b71eb782f122cb/lib/flash_uds.py"
+      ],
+      "encoding": "ascii",
+      "writable": false,
+      "read_by_default": false,
+      "category": "Identification",
+      "description": "Bootloader identification text reported by the controller. Reading an identifier does not back up or update the bootloader."
+    },
+    {
+      "id": "vag.software_block_version",
+      "name": "Software block version",
+      "ecu": "*",
+      "did": "F1AB",
+      "confidence": "source-confirmed",
+      "source": [
+        "https://github.com/bri3d/VW_Flash/blob/293f46d782bae2ced930497889b71eb782f122cb/lib/constants.py",
+        "https://github.com/bri3d/VW_Flash/blob/293f46d782bae2ced930497889b71eb782f122cb/lib/flash_uds.py"
+      ],
+      "encoding": "ascii",
+      "writable": false,
+      "read_by_default": false,
+      "category": "Identification",
+      "description": "Logical software-block version string. Kept separate from the main application software version used by the write fingerprint."
+    },
+    {
+      "id": "vag.production_change",
+      "name": "ECU production revision identifier",
+      "ecu": "*",
+      "did": "F17E",
+      "confidence": "source-confirmed",
+      "source": [
+        "https://github.com/bri3d/VW_Flash/blob/293f46d782bae2ced930497889b71eb782f122cb/lib/constants.py",
+        "https://github.com/bri3d/VW_Flash/blob/293f46d782bae2ced930497889b71eb782f122cb/lib/flash_uds.py"
+      ],
+      "encoding": "ascii",
+      "writable": false,
+      "read_by_default": false,
+      "category": "Identification",
+      "description": "Production-change identifier reported by the controller. The catalog records the identifier as text without interpreting manufacturer-specific contents."
+    },
+    {
+      "id": "vag.programming_information",
+      "name": "ECU programming information",
+      "ecu": "*",
+      "did": "F1DF",
+      "confidence": "source-confirmed",
+      "source": [
+        "https://github.com/bri3d/VW_Flash/blob/293f46d782bae2ced930497889b71eb782f122cb/lib/constants.py",
+        "https://github.com/bri3d/VW_Flash/blob/293f46d782bae2ced930497889b71eb782f122cb/lib/flash_uds.py"
+      ],
+      "encoding": "hex",
+      "writable": false,
+      "read_by_default": false,
+      "category": "Programming",
+      "description": "Programming-information record preserved as raw bytes. No counter layout, flashing operation or restore permission is inferred."
+    }
+  ]
+}
