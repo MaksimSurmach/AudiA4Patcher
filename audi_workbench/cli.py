@@ -159,8 +159,7 @@ async def _collect(args, store, dictionary):
                              "stopped_reason": snapshot.get("stopped_reason")})
         except (WorkbenchError, OSError, ValueError) as exc:
             captures.append({"ecu": ecu, "complete": False, "error": str(exc)})
-    with store.lock():
-        exported = store.export({"schema": "audi-workbench.dictionary/v1", "entries": dictionary.entries})
+    exported = store.export(dictionary.document())
     return {"captures": captures, "artifact": str(exported), "uploaded": False, "redacted": False,
             "complete": all(item["complete"] for item in captures)}
 
@@ -186,7 +185,7 @@ def main(argv: list[str] | None = None) -> int:
         dictionary = Dictionary.load(args.dictionary)
         store = Store(args.data_dir)
         if args.command == "dictionary":
-            emit({"schema": "audi-workbench.dictionary/v1", "entries": dictionary.entries})
+            emit(dictionary.document())
             return 0
         if args.command == "inspect":
             snapshot = store.read(args.snapshot)
@@ -200,8 +199,7 @@ def main(argv: list[str] | None = None) -> int:
             emit({"artifact": str(path), "candidate_permissions": "read-only", "semantics": "unknown"})
             return 0
         if args.command == "export":
-            with store.lock():
-                path = store.export({"schema": "audi-workbench.dictionary/v1", "entries": dictionary.entries})
+            path = store.export(dictionary.document())
             emit({"artifact": str(path), "redacted": False, "uploaded": False})
             return 0
         if args.command == "collect":

@@ -154,6 +154,9 @@ class Dictionary:
         except (OSError, ValueError, TypeError) as exc:
             raise WorkbenchError(f"Cannot load dictionary: {exc}") from exc
 
+    def document(self) -> dict[str, Any]:
+        return {"schema": SCHEMA, "entries": self.entries}
+
     def entry(self, entry_id: str) -> dict[str, Any]:
         for entry in self.entries:
             if entry["id"] == entry_id:

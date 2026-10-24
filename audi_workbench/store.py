@@ -120,34 +120,35 @@ class Store:
 
     def export(self, dictionary: dict | list | None = None) -> Path:
         """Explicit local export; never uploads anything. Includes unredacted evidence."""
-        path = self.root / "exports" / f"audi-support-{dt.datetime.now(dt.UTC):%Y%m%dT%H%M%S}-{uuid.uuid4().hex[:8]}.zip"
-        files = []
-        for kind in ("snapshots", "plans", "transactions", "traces"):
-            files.extend(sorted((self.root / kind).iterdir()))
-        files = [p for p in files if p.is_file() and not p.is_symlink() and not p.name.startswith(".")]
-        if len(files) > 5000 or sum(p.stat().st_size for p in files) > 256 * 1024 * 1024:
-            raise SafetyError("Export exceeds 256 MiB / 5000 files; use a separate run directory")
-        fd, temporary = tempfile.mkstemp(prefix=".export-", dir=path.parent)
-        os.close(fd)
-        try:
-            with zipfile.ZipFile(temporary, "w", zipfile.ZIP_DEFLATED) as archive:
-                manifest = {"schema": "audi-workbench.export/v1", "created_at": now(), "redacted": False,
-                            "purpose": "Read-only evidence for ECU-specific dictionary research", "files": {}}
-                for item in files:
-                    data = item.read_bytes()
-                    name = item.relative_to(self.root).as_posix()
-                    archive.writestr(name, data)
-                    manifest["files"][name] = hashlib.sha256(data).hexdigest()
-                if dictionary is not None:
-                    archive.writestr("dictionary.json", json.dumps(dictionary, indent=2, ensure_ascii=False))
-                archive.writestr("manifest.json", json.dumps(manifest, indent=2))
-                archive.writestr("README.txt", "Local evidence export. May include VIN, serial numbers and raw BLE/UDS logs.\n"
-                                 "Successful reads do not prove field semantics or writability.\n"
-                                 "Snapshot coverage is explicit and partial; this is not a flash image.\n")
-            with open(temporary, "rb") as stream:
-                os.fsync(stream.fileno())
-            os.replace(temporary, path)
-        finally:
-            if os.path.exists(temporary):
-                os.unlink(temporary)
-        return path
+        with self.lock():
+            path = self.root / "exports" / f"audi-support-{dt.datetime.now(dt.UTC):%Y%m%dT%H%M%S}-{uuid.uuid4().hex[:8]}.zip"
+            files = []
+            for kind in ("snapshots", "plans", "transactions", "traces"):
+                files.extend(sorted((self.root / kind).iterdir()))
+            files = [p for p in files if p.is_file() and not p.is_symlink() and not p.name.startswith(".")]
+            if len(files) > 5000 or sum(p.stat().st_size for p in files) > 256 * 1024 * 1024:
+                raise SafetyError("Export exceeds 256 MiB / 5000 files; use a separate run directory")
+            fd, temporary = tempfile.mkstemp(prefix=".export-", dir=path.parent)
+            os.close(fd)
+            try:
+                with zipfile.ZipFile(temporary, "w", zipfile.ZIP_DEFLATED) as archive:
+                    manifest = {"schema": "audi-workbench.export/v1", "created_at": now(), "redacted": False,
+                                "purpose": "Read-only evidence for ECU-specific dictionary research", "files": {}}
+                    for item in files:
+                        data = item.read_bytes()
+                        name = item.relative_to(self.root).as_posix()
+                        archive.writestr(name, data)
+                        manifest["files"][name] = hashlib.sha256(data).hexdigest()
+                    if dictionary is not None:
+                        archive.writestr("dictionary.json", json.dumps(dictionary, indent=2, ensure_ascii=False))
+                    archive.writestr("manifest.json", json.dumps(manifest, indent=2))
+                    archive.writestr("README.txt", "Local evidence export. May include VIN, serial numbers and raw BLE/UDS logs.\n"
+                                     "Successful reads do not prove field semantics or writability.\n"
+                                     "Snapshot coverage is explicit and partial; this is not a flash image.\n")
+                with open(temporary, "rb") as stream:
+                    os.fsync(stream.fileno())
+                os.replace(temporary, path)
+            finally:
+                if os.path.exists(temporary):
+                    os.unlink(temporary)
+            return path

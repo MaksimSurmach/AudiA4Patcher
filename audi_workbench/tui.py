@@ -444,8 +444,7 @@ class WorkbenchApp(App):
                 self.query_one("#transaction-file", Input).value = str(path)
                 self._status(f"Reconciliation: {result.get('status')} · {path}")
             elif action == "export":
-                with wb.store.lock():
-                    path = wb.store.export({"schema": "audi-workbench.dictionary/v1", "entries": wb.dictionary.entries})
+                path = wb.store.export(wb.dictionary.document())
                 self._status(f"Local support ZIP saved: {path}")
             elif action == "dictionary":
                 self._show_dictionary()
