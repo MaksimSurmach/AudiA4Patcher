@@ -232,3 +232,24 @@ async def test_failed_apply_reenables_controls_and_clears_write_confirmation(tmp
                 pass
         finally:
             link.release_preflight.set()
+
+
+async def test_empty_paths_and_bad_numbers_name_the_field(tmp_path):
+    app = WorkbenchApp(Workbench(Store(tmp_path), Dictionary.load(), DemoLink(tmp_path / "demo-state.json")))
+    async with app.run_test(size=(120, 40)) as pilot:
+        for action in ("apply", "load-plan", "restore", "reconcile", "inspect"):
+            app.query_one("#snapshot", Input).value = ""
+            app._start_operation(action)
+            await finish(app, pilot)
+            assert app.last_error.startswith("Empty field:"), (action, app.last_error)
+        app._start_operation("capture")
+        await finish(app, pilot)
+        app.query_one("#edit-byte", Input).value = "x"
+        app.query_one("#edit-value", Input).value = "1"
+        app._start_operation("preview")
+        await finish(app, pilot)
+        assert app.last_error.startswith("Not a number: 'x'")
+        app.query_one("#capture-dids", Input).value = "zz"
+        app._start_operation("capture")
+        await finish(app, pilot)
+        assert "DID must be hexadecimal" in app.last_error

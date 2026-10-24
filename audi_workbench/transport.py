@@ -252,7 +252,7 @@ def _bleak() -> tuple[Any, Any]:
     try:
         from bleak import BleakClient, BleakScanner
     except ImportError as exc:
-        raise TransportError("BLE support is not installed. Run: python -m pip install '.[ble]'") from exc
+        raise TransportError("BLE support is not installed. Run: uv sync --locked") from exc
     return BleakClient, BleakScanner
 
 
@@ -281,10 +281,9 @@ class BLELink:
     kind = "ble"
     max_request_bytes = 7
 
-    def __init__(self, device: str, trace: Trace | None = None, experimental_isotp: bool = False):
+    def __init__(self, device: str, trace: Trace | None = None):
         self.device = device
         self.trace = trace
-        self.experimental_isotp = experimental_isotp
         self.metadata: dict[str, Any] = {
             "driver": "ble-elm327-caf1", "hardware_validated": False,
             "max_request_bytes": 7, "long_request_support": False,
@@ -306,11 +305,6 @@ class BLELink:
         async with self._lock:
             if self._ready:
                 return
-            if self.experimental_isotp:
-                raise TransportError(
-                    "Manual multi-frame request transmission is not implemented/validated in this release. "
-                    "Use the seven-byte CAF1 limit; do not enable writes by changing that limit."
-                )
             if not self.device or not self.device.strip():
                 raise TransportError("Choose an exact BLE name or address from the scan command")
             client_class, _ = _bleak()

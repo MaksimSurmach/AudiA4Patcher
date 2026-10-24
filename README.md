@@ -266,8 +266,7 @@ uv build
 The GitHub Actions workflow runs software tests, headless Textual tests, lint,
 simulator collection and a build on Linux and macOS with Python 3.12. It does
 not access a real adapter. When dependencies change, regenerate `uv.lock` with
-`uv lock` and commit it together with `pyproject.toml`. The old
-`constraints-tested.txt` is retained only as historical v0.1 validation evidence.
+`uv lock` and commit it together with `pyproject.toml`.
 
 | Document | Contents |
 |---|---|
@@ -276,10 +275,6 @@ not access a real adapter. When dependencies change, regenerate `uv.lock` with
 | [Dictionary catalog](docs/DICTIONARY_CATALOG.md) | Included identifiers, categories and optional reads |
 | [Architecture](docs/ARCHITECTURE.md) | Components, transaction states and failure handling |
 | [Codex handoff](docs/CODEX_HANDOFF.md) | Concrete next tasks and physical validation |
-| [Version 0.2 validation](docs/VALIDATION-0.2.md) | uv, UI, catalog, packaging and final software checks |
-| [Version 0.2 review](docs/REVIEW-0.2.md) | Independent review and verified follow-up changes |
-| [Initial validation record](docs/VALIDATION.md) | Version 0.1 test environment and evidence |
-| [Initial review record](docs/REVIEW.md) | Version 0.1 review findings and their resolutions |
 | [AGENTS.md](AGENTS.md) | Rules for continuing development |
 
 Dependency workflow references: [uv project structure](https://docs.astral.sh/uv/concepts/projects/layout/),

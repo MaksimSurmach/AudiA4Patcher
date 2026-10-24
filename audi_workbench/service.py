@@ -27,6 +27,8 @@ from .model import (
 )
 from .store import Store, digest, now
 
+IDENTITY_NAMES = {did: name for name, did in IDENTITY_DIDS.items()}
+
 
 class Workbench:
     def __init__(self, store: Store, dictionary: Dictionary, link: DiagnosticLink | None = None):
@@ -140,10 +142,9 @@ class Workbench:
                         data = await self._read(ecu, did)
                         record = {"ok": True, "hex": data.hex().upper(), "length": len(data)}
                         snapshot["records"][did_hex(did)] = record
-                        for name, identity_did in IDENTITY_DIDS.items():
-                            if did == identity_did:
-                                snapshot["identity"][name] = data.hex().upper()
-                                record["display"] = data.decode("ascii", errors="replace").rstrip("\x00 ")
+                        if name := IDENTITY_NAMES.get(did):
+                            snapshot["identity"][name] = data.hex().upper()
+                            record["display"] = data.decode("ascii", errors="replace").rstrip("\x00 ")
                     except WorkbenchError as exc:
                         snapshot["records"][did_hex(did)] = {"ok": False, "error": str(exc)}
                         # A missing DID is normal. A broken command stream must not be reused.

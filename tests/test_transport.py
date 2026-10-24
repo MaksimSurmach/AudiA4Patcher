@@ -512,10 +512,6 @@ class BLELinkTests(unittest.IsolatedAsyncioTestCase):
             with self.subTest(output=output), self.assertRaises(ProtocolError):
                 await link.voltage()
 
-    async def test_unsupported_experimental_flag_is_not_an_override(self):
-        with self.assertRaisesRegex(TransportError, "not implemented"):
-            await BLELink("test", experimental_isotp=True).open()
-
     async def test_duplicate_names_require_device_address_selection(self):
         devices = [(SimpleNamespace(address=f"uuid{i}", name="IOS-Vlink"),
                     SimpleNamespace(local_name="IOS-Vlink")) for i in range(2)]

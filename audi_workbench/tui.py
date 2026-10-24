@@ -25,6 +25,7 @@ from textual.widgets import (
     TabPane,
 )
 
+from .cli import hex_did
 from .model import ECUS, WorkbenchError
 from .simulator import DemoLink
 from .store import Store
@@ -100,7 +101,7 @@ class WorkbenchApp(App):
     Header { background: #1d2d40; }
     Footer { background: #1d2d40; }
     #mode-banner { background: #1c3545; color: #a5dfef; padding: 0 2; height: auto; max-height: 3; }
-    #status { dock: bottom; height: auto; max-height: 3; background: #1c2938; padding: 0 2; }
+    #status { dock: bottom; margin-bottom: 1; height: 1; background: #1c2938; padding: 0 2; text-wrap: nowrap; text-overflow: ellipsis; }
     TabPane { padding: 1 2; }
     VerticalScroll { height: 1fr; }
     .row { height: auto; min-height: 3; margin-bottom: 1; }
@@ -295,6 +296,19 @@ class WorkbenchApp(App):
     def _input(self, key: str) -> str:
         return self.query_one(f"#{key}", Input).value.strip()
 
+    def _path(self, key: str) -> Path:
+        # Path("") is ".", which surfaced as "Is a directory" instead of naming the empty field.
+        if not (value := self._input(key)):
+            raise WorkbenchError(f"Empty field: {self.query_one(f'#{key}', Input).placeholder}")
+        return Path(value).expanduser()
+
+    def _number(self, key: str) -> int | None:
+        value = self._input(key)
+        try:
+            return int(value, 0) if value else None
+        except ValueError as exc:
+            raise WorkbenchError(f"Not a number: {value!r} ({self.query_one(f'#{key}', Input).placeholder})") from exc
+
     def _status(self, text: str):
         self.query_one("#status", Static).update(text)
         self.query_one("#logs", RichLog).write(Text(text))
@@ -355,7 +369,7 @@ class WorkbenchApp(App):
                     self.action_view("capture-tab")
             elif action == "capture":
                 text = self._input("capture-dids")
-                dids = [int(item.strip(), 16) for item in text.split(",") if item.strip()] if text else None
+                dids = [hex_did(item) for item in text.split(",") if item.strip()] or None
                 async with wb:
                     path = await wb.capture(str(self.query_one("#ecu", Select).value), dids=dids,
                                             include_defaults=not self.query_one("#only-dids", Checkbox).value,
@@ -375,38 +389,36 @@ class WorkbenchApp(App):
                         raise WorkbenchError("No saved snapshots yet")
                     path = files[-1]
                 else:
-                    path = Path(self._input("snapshot"))
+                    path = self._path("snapshot")
                 self._load_snapshot(path)
                 self.action_view("explore-tab")
                 self._status(f"Opened {path}")
             elif action == "diff":
                 if self.snapshot_path is None:
                     raise WorkbenchError("Open a first snapshot")
-                result = wb.diff(self.snapshot_path, Path(self._input("diff-path")))
+                result = wb.diff(self.snapshot_path, self._path("diff-path"))
                 table = self.query_one("#diff-table", DataTable)
                 table.clear()
                 for row in result.get("rows", []):
                     table.add_row(str(row.get("did", "")), str(row.get("before_hex", "")), str(row.get("after_hex", "")))
                 self._status(result.get("warning") or f"Compared {len(result.get('rows', []))} differing records")
             elif action == "preview":
-                snapshot = self._input("snapshot")
-                if not snapshot:
+                if not self._input("snapshot"):
                     raise WorkbenchError("Capture or open a snapshot first")
                 entry, did = self._input("entry"), self._input("target-did")
                 if bool(entry) == bool(did):
                     raise WorkbenchError("Choose exactly one dictionary entry OR raw DID")
                 full_hex = self._input("edit-hex")
-                byte, bit, value = (self._input(key) for key in ("edit-byte", "edit-bit", "edit-value"))
-                path = wb.make_plan(Path(snapshot), entry_id=entry or None, did=int(did, 16) if did else None,
-                                    value_hex=full_hex or None, byte=int(byte, 0) if byte else None,
-                                    bit=int(bit, 0) if bit else None, value=int(value, 0) if value else None)
+                path = wb.make_plan(self._path("snapshot"), entry_id=entry or None, did=hex_did(did) if did else None,
+                                    value_hex=full_hex or None, byte=self._number("edit-byte"),
+                                    bit=self._number("edit-bit"), value=self._number("edit-value"))
                 self._load_plan(path)
                 self._status(f"Plan saved; no vehicle write: {path}")
             elif action == "load-plan":
-                self._load_plan(Path(self._input("plan-file")))
+                self._load_plan(self._path("plan-file"))
                 self._status("Loaded plan; review before applying")
             elif action == "apply":
-                path = Path(self._input("plan-file"))
+                path = self._path("plan-file")
                 confirmation = self._input("confirmation")
                 enabled = self.query_one("#enable-writes", Checkbox).value
                 try:
@@ -421,12 +433,12 @@ class WorkbenchApp(App):
                     self.query_one("#enable-writes", Checkbox).value = False
                     self.query_one("#confirmation", Input).value = ""
             elif action == "restore":
-                path = wb.make_restore(Path(self._input("transaction-file")))
+                path = wb.make_restore(self._path("transaction-file"))
                 self._load_plan(path)
                 self._status(f"Restore preview prepared. Review and confirm it: {path}")
             elif action == "reconcile":
                 async with wb:
-                    path = await wb.reconcile(Path(self._input("transaction-file")))
+                    path = await wb.reconcile(self._path("transaction-file"))
                 result = wb.store.read(path)
                 self.transaction_path = path
                 self.query_one("#transaction-file", Input).value = str(path)

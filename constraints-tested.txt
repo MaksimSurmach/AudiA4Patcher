@@ -1,8 +1,0 @@
-# Historical v0.1.0 verification record, retained for docs/VALIDATION.md.
-# Version 0.2.0 uses uv.lock. Use `uv sync --locked` for current installations.
-# Platform-specific dependencies are resolved by uv; this is not a Linux freeze.
-bleak==2.1.1
-textual==7.5.0
-pytest==9.1.1
-pytest-asyncio==1.4.0
-ruff==0.17.2

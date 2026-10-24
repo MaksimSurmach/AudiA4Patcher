@@ -11,10 +11,8 @@ snapshots and records, a dictionary browser, and keyboard navigation. Read
 docs/TUI_GUIDE.md for the actual workflow. The import package is still
 `audi_workbench`; `audi-a4-patcher` and `audi-workbench` call the same CLI.
 
-The 0.2 software validation and review are recorded in docs/VALIDATION-0.2.md
-and docs/REVIEW-0.2.md. The original 0.1 records remain in docs/VALIDATION.md and
-docs/REVIEW.md. These software checks do not establish hardware support.
-Keep subsequent verification evidence explicit about the version and platform.
+Software checks do not establish hardware support. Keep verification evidence
+explicit about the version and platform.
 
 The user owns a Mac and iPhone, an Audi A4 B9 2017 with MHS2 5F, and a Vgate iCar
 Pro 2S. Do not substitute MQB feature maps for MLB evo or recommend Windows as a
