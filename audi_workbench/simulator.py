@@ -3,6 +3,7 @@ from __future__ import annotations
 
 import json
 import math
+import re
 from copy import deepcopy
 from pathlib import Path
 from typing import Any
@@ -45,11 +46,18 @@ def _validate_state(state: Any) -> None:
         raise ValueError("ECU records are missing")
     expected = _initial_state()["ecus"]
     for key, module in state["ecus"].items():
-        records = module["records"]  # Malformed shapes raise TypeError/KeyError for the caller.
+        if not isinstance(module, dict) or not isinstance(module.get("records"), dict):
+            raise TypeError("malformed module")
+        records = module["records"]
         if not set(expected[key]["records"]) <= set(records):
             raise ValueError(f"missing records for ECU {key}")
-        for raw in records.values():
-            bytes.fromhex(raw)
+        for did, raw in records.items():
+            if not isinstance(did, str) or not re.fullmatch(r"[0-9A-Fa-f]{4}", did) or not isinstance(raw, str):
+                raise ValueError("invalid record key/value")
+            data = bytes.fromhex(raw)
+            base = expected[key]["records"].get(did)
+            if base is not None and (not data or len(data) != len(bytes.fromhex(base))):
+                raise ValueError(f"wrong record length {key}/{did}")
 
 
 class DemoLink:

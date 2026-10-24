@@ -155,8 +155,38 @@ def test_raw_reads_in_one_session_and_keeps_negative_answers(tmp_path):
     assert data["complete"]
 
 
+@pytest.mark.parametrize("prefix", [[], ["22F190"]], ids=["sole-request", "final-request"])
+@pytest.mark.parametrize("failure", ["protocol", "pending"])
+def test_raw_terminal_failure_exits_four(tmp_path, monkeypatch, capsys, prefix, failure):
+    from audi_workbench.cli import main
+    from audi_workbench.model import ProtocolError
+    from audi_workbench.simulator import DemoLink
+
+    sent = []
+    request = DemoLink.request
+
+    async def fail_terminal(self, ecu, payload, **kwargs):
+        sent.append(payload)
+        if payload == bytes.fromhex("22D100"):
+            if failure == "pending":
+                return bytes.fromhex("7F2278")
+            raise ProtocolError("Malformed terminal response")
+        return await request(self, ecu, payload, **kwargs)
+
+    monkeypatch.setattr(DemoLink, "request", fail_terminal)
+    code = main(["--data-dir", str(tmp_path), "--demo", "raw", *prefix, "22D100"])
+    assert code == 4
+    output = capsys.readouterr()
+    assert not output.err
+    result = json.loads(output.out)
+    assert not result["complete"]
+    assert [item["request"] for item in result["results"]] == prefix + ["22D100"]
+    assert not result["results"][-1]["ok"] and result["results"][-1]["stopped"]
+    assert sent == [bytes.fromhex(payload) for payload in prefix + ["22D100"]]
+
+
 @pytest.mark.parametrize("request_hex", ["2ED10000", "3101FF00", "1101", "14FFFFFF", "2701", "1002",
-                                         "2F0600", "3E00", "22F1", "19"])
+                                         "2F0600", "3E00", "22F1", "19", "09"])
 def test_raw_refuses_everything_but_reads_before_connecting(tmp_path, request_hex):
     result = invoke(tmp_path, "--demo", "raw", request_hex)
     assert result.returncode == 2

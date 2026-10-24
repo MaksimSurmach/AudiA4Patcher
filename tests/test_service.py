@@ -7,6 +7,7 @@ from audi_workbench.model import NegativeResponse, NoData, ProtocolError, Safety
 from audi_workbench.service import Workbench
 from audi_workbench.simulator import DemoLink
 from audi_workbench.store import Store
+from audi_workbench.transport import parse_elm_response
 
 
 def test_store_detects_modified_artifact(tmp_path):
@@ -543,3 +544,106 @@ async def test_unresponsive_ecu_is_not_reported_as_successful_capture(rig, monke
         monkeypatch.setattr(link, "request", no_data)
         snapshot = store.read(await wb.capture())
         assert not snapshot["complete"] and not snapshot["identity"]
+
+
+@pytest.mark.parametrize("position", ["only", "first", "last"])
+@pytest.mark.parametrize("failure", ["protocol", "transport", "pending-response", "pending-error"])
+async def test_raw_terminal_failure_is_incomplete_and_never_retried(rig, monkeypatch, position, failure):
+    wb, link, _ = rig
+    good, terminal = bytes.fromhex("22F190"), bytes.fromhex("22D100")
+    before = [good] if position == "last" else []
+    after = [good] if position == "first" else []
+    sent = []
+    request = link.request
+
+    async def terminal_failure(ecu, payload, **kwargs):
+        sent.append(payload)
+        if payload == terminal:
+            if failure == "pending-response":
+                return bytes.fromhex("7F2278")
+            raise {"protocol": ProtocolError("Malformed terminal response"),
+                   "transport": TransportError("Disconnected during terminal response"),
+                   "pending-error": NegativeResponse(0x22, 0x78)}[failure]
+        return await request(ecu, payload, **kwargs)
+
+    monkeypatch.setattr(link, "request", terminal_failure)
+    async with wb:
+        result = await wb.raw("5F", before + [terminal] + after)
+    assert not result["complete"]
+    assert sent == before + [terminal]
+    assert [item["request"] for item in result["results"]] == [payload.hex().upper() for payload in sent]
+    assert all(item["ok"] for item in result["results"][:-1])
+    failed = result["results"][-1]
+    assert not failed["ok"] and failed["stopped"]
+    if failure.startswith("pending"):
+        assert failed["nrc"] == "78"
+    if failure == "pending-response":
+        assert failed["response"] == "7F2278"
+    assert not link.writes
+
+
+async def test_raw_no_data_and_final_negative_responses_preserve_completion(rig, monkeypatch):
+    wb, link, _ = rig
+    faults = {bytes.fromhex("22AAAA"): NoData("ECU returned NO DATA"),
+              bytes.fromhex("22BBBB"): NegativeResponse(0x22, 0x31),
+              bytes.fromhex("22CCCC"): NegativeResponse(0x22, 0x21)}
+    requests = [bytes.fromhex("22D100"), *faults, bytes.fromhex("22F190")]
+    sent = []
+    request = link.request
+
+    async def recoverable_response(ecu, payload, **kwargs):
+        sent.append(payload)
+        if payload in faults:
+            raise faults[payload]
+        return await request(ecu, payload, **kwargs)
+
+    monkeypatch.setattr(link, "request", recoverable_response)
+    async with wb:
+        result = await wb.raw("5F", requests)
+    assert result["complete"] and sent == requests
+    assert [item["ok"] for item in result["results"]] == [True, False, False, False, True]
+    assert [item.get("nrc") for item in result["results"]] == [None, None, "31", "21", None]
+    assert all(not item.get("stopped") for item in result["results"])
+    assert not link.writes
+
+
+@pytest.mark.parametrize("through_parser", [False, True], ids=["diagnostic-link", "elm-parser"])
+@pytest.mark.parametrize("response_hex", ["4904014142", "49"], ids=["wrong-pid", "missing-pid"])
+async def test_raw_obd_vehicle_information_rejects_unrelated_pid(rig, monkeypatch, through_parser, response_hex):
+    wb, link, _ = rig
+    sent = []
+    response = bytes.fromhex(response_hex)
+
+    async def obd_response(ecu, payload, **kwargs):
+        sent.append(payload)
+        if through_parser:
+            return parse_elm_response(f"{ecu.rx:03X} {len(response):02X} {response.hex(' ')}\r>", ecu.rx, payload)
+        return response
+
+    monkeypatch.setattr(link, "request", obd_response)
+    async with wb:
+        result = await wb.raw("01", [bytes.fromhex("0902"), bytes.fromhex("010D")])
+    failed = result["results"][0]
+    assert not failed["ok"]
+    assert failed["stopped"] and not result["complete"]
+    assert sent == [bytes.fromhex("0902")]
+    if not through_parser:
+        assert failed["response"] == response_hex
+    assert not link.writes
+
+
+@pytest.mark.parametrize("through_parser", [False, True], ids=["diagnostic-link", "elm-parser"])
+async def test_raw_obd_vehicle_information_preserves_pid_and_record_prefix(rig, monkeypatch, through_parser):
+    wb, link, _ = rig
+
+    async def obd_response(ecu, payload, **kwargs):
+        if through_parser:
+            return parse_elm_response("7E8 05 49 02 01 41 42\r>", ecu.rx, payload)
+        return bytes.fromhex("4902014142")
+
+    monkeypatch.setattr(link, "request", obd_response)
+    async with wb:
+        result = await wb.raw("01", [bytes.fromhex("0902")])
+    assert result["complete"]
+    assert result["results"] == [{"request": "0902", "response": "4902014142", "data": "02014142", "ok": True}]
+    assert not link.writes

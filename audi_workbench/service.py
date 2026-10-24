@@ -196,6 +196,8 @@ class Workbench:
             raise SafetyError("22 needs one or more complete two-byte DIDs")
         if payload[0] == 0x19 and len(payload) < 2:
             raise SafetyError("19 needs a subfunction")
+        if payload[0] == 0x09 and len(payload) < 2:
+            raise SafetyError("09 needs a vehicle information PID")
 
     async def raw(self, ecu_key: str, requests: list[bytes]) -> dict:
         """Send explicit read-only requests in order; keep every answer or error."""
@@ -208,6 +210,7 @@ class Workbench:
             if len(payload) > self.link.max_request_bytes:
                 raise SafetyError(f"{payload.hex().upper()} exceeds the {self.link.max_request_bytes}-byte request limit")
         results = []
+        complete = False
         async with self._operation_lock:
             for payload in requests:
                 item = {"request": payload.hex().upper()}
@@ -219,6 +222,7 @@ class Workbench:
                 except NegativeResponse as exc:
                     item.update(ok=False, nrc=f"{exc.code:02X}", error=str(exc))
                     if exc.code == 0x78:
+                        item["stopped"] = True
                         results.append(item)
                         break
                 except NoData as exc:
@@ -231,8 +235,10 @@ class Workbench:
                 results.append(item)
                 if self.link.kind != "demo":
                     await asyncio.sleep(0.35)
+            else:
+                complete = True
         return {"ecu": ecu.as_dict(), "origin": self.link.kind, "results": results,
-                "complete": len(results) == len(requests), "trace_file": str(self.store.trace_path)}
+                "complete": complete, "trace_file": str(self.store.trace_path)}
 
     @staticmethod
     def edit_value(before: bytes, *, value_hex: str | None = None, byte: int | None = None,

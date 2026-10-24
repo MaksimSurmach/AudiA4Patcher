@@ -161,7 +161,7 @@ def parse_elm_response(text: str, expected_rx: int, request: bytes | None = None
     if request and result[0] != 0x7F:
         if request[0] in (0x22, 0x2E) and result[1:3] != request[1:3]:
             raise ProtocolError("Positive response DID does not match the request")
-        if request[0] in (0x01, 0x10, 0x19, 0x3E) and result[1:2] != request[1:2]:
+        if request[0] in (0x01, 0x09, 0x10, 0x19, 0x3E) and result[1:2] != request[1:2]:
             raise ProtocolError("Positive response subfunction/PID does not match the request")
     return result
 

@@ -86,6 +86,13 @@ class ISOTransportParsingTests(unittest.TestCase):
             with self.subTest(text=text), self.assertRaises(ProtocolError):
                 parse_elm_response(text, 0x7DD, bytes.fromhex("22F190"))
 
+    def test_obd_vehicle_information_requires_the_requested_pid(self):
+        for text in ("7E8 05 49 04 01 41 42\r>", "7E8 01 49\r>"):
+            with self.subTest(text=text), self.assertRaisesRegex(ProtocolError, "PID"):
+                parse_elm_response(text, 0x7E8, bytes.fromhex("0902"))
+        self.assertEqual(parse_elm_response("7E8 05 49 02 01 41 42\r>", 0x7E8, bytes.fromhex("0902")),
+                         bytes.fromhex("4902014142"))
+
     def test_bad_isotp_and_dlc_output_rejected(self):
         for text in (
             "7DD 08 62 F1 90 57 41 55 58",  # SF length > 7.

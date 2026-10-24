@@ -119,4 +119,6 @@ def uds_data(response: bytes, request: bytes) -> bytes:
         return response[3:]
     if not response or response[0] != request[0] + 0x40:
         raise ProtocolError("Unexpected diagnostic response service")
+    if request[0] == 0x09 and (len(request) < 2 or response[1:2] != request[1:2]):
+        raise ProtocolError("Positive response does not echo the requested vehicle information PID")
     return response[1:]

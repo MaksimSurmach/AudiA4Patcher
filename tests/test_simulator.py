@@ -66,6 +66,67 @@ def test_corrupt_existing_demo_state_is_not_reset(tmp_path):
     assert json.loads(path.read_text()) == {"schema": "wrong"}
 
 
+async def assert_invalid_state_is_preserved(tmp_path, state):
+    path = tmp_path / "sim.json"
+    content = json.dumps(state, indent=2) + "\n"
+    path.write_text(content)
+    link = DemoLink(path)
+    original = link.state
+    with pytest.raises(TransportError, match="Invalid existing simulator state; it was not reset"):
+        await link.open()
+    assert not link.is_open
+    assert link.state == original
+    assert path.read_text() == content
+
+
+@pytest.mark.parametrize("raw", ["", "00", "00" * 5, "GG000000", None, []],
+                         ids=["empty", "short", "long", "invalid-hex", "null", "list"])
+async def test_invalid_required_record_is_not_loaded_or_reset(tmp_path, raw):
+    state = DemoLink().state
+    state["ecus"]["5F"]["records"]["D100"] = raw
+    await assert_invalid_state_is_preserved(tmp_path, state)
+
+
+@pytest.mark.parametrize("did", ["BEE", "BEEFF", "GEEF", "+123", "1_23", " 123"])
+async def test_malformed_extra_record_key_is_not_loaded_or_reset(tmp_path, did):
+    state = DemoLink().state
+    state["ecus"]["5F"]["records"][did] = "0102"
+    await assert_invalid_state_is_preserved(tmp_path, state)
+
+
+async def test_record_keys_list_is_reported_as_invalid_state_without_reset(tmp_path):
+    state = DemoLink().state
+    state["ecus"]["5F"]["records"] = list(state["ecus"]["5F"]["records"])
+    await assert_invalid_state_is_preserved(tmp_path, state)
+
+
+@pytest.mark.parametrize("module", [None, [], {}, {"records": None}])
+async def test_malformed_module_is_reported_as_invalid_state_without_reset(tmp_path, module):
+    state = DemoLink().state
+    state["ecus"]["5F"] = module
+    await assert_invalid_state_is_preserved(tmp_path, state)
+
+
+async def test_missing_required_record_is_not_loaded_or_reset(tmp_path):
+    state = DemoLink().state
+    del state["ecus"]["5F"]["records"]["D100"]
+    await assert_invalid_state_is_preserved(tmp_path, state)
+
+
+async def test_valid_extra_records_remain_readable_without_rewriting_state(tmp_path):
+    state = DemoLink().state
+    state["ecus"]["5F"]["records"].update({"BEEF": "01 02 ff", "CAFE": ""})
+    path = tmp_path / "sim.json"
+    content = json.dumps(state, indent=2) + "\n"
+    path.write_text(content)
+    link = DemoLink(path)
+    await link.open()
+    assert await link.request(ECUS["5F"], bytes.fromhex("22BEEF")) == bytes.fromhex("62BEEF0102FF")
+    assert await link.request(ECUS["5F"], bytes.fromhex("22CAFE")) == bytes.fromhex("62CAFE")
+    await link.close()
+    assert path.read_text() == content
+
+
 def test_engine_conditions_and_negative_responses_are_diagnostic_payloads():
     async def run():
         link = DemoLink()
