@@ -167,7 +167,7 @@ class WorkbenchApp(App):
         with TabbedContent(initial="capture-tab" if self.workbench.link else "devices-tab", id="tabs"):
             with TabPane("Devices", id="devices-tab"), VerticalScroll():
                 yield Label("Choose a data source", classes="section")
-                yield Static("Scan nearby Bluetooth devices, select a row, then use its exact address. "
+                yield Static("Scan nearby Bluetooth devices and press Enter on the adapter row (usually IOS-Vlink). "
                              "F1–F6 switch views; / searches; Enter selects; ? opens help.", classes="hint")
                 with Horizontal(classes="row"):
                     yield Button("Scan Bluetooth", variant="primary", id="scan")
@@ -341,7 +341,9 @@ class WorkbenchApp(App):
                 self._devices = []
                 self._show_devices()
                 self.query_one("#device-count", Static).update("Scanning Bluetooth…")
-                self._devices = await scan_devices()
+                # Named adapters first, strongest signal first: the OBD dongle is usually the closest device.
+                self._devices = sorted(await scan_devices(),
+                                       key=lambda d: (not d.get("name"), -(d.get("rssi") or -999)))
                 self._show_devices()
                 self._status(f"Found {len(self._devices)} devices. Select an adapter by its exact address.")
             elif action in ("use-device", "simulator", "offline"):
@@ -375,6 +377,7 @@ class WorkbenchApp(App):
                                             include_defaults=not self.query_one("#only-dids", Checkbox).value,
                                             include_dtc=self.query_one("#with-dtc", Checkbox).value)
                 self._load_snapshot(path)
+                self.action_view("explore-tab")
                 document = wb.store.read(path)
                 if document.get("complete"):
                     self.query_one("#capture-note", Static).update(f"Capture finished: {path}")
@@ -659,7 +662,7 @@ class WorkbenchApp(App):
         key = str(event.row_key.value)
         if event.data_table.id == "device-table":
             self.query_one("#device-address", Input).value = key
-            self._status(f"Selected row: {key}. Use device to choose this adapter.")
+            self._start_operation("use-device", "Use device")
         elif event.data_table.id == "snapshot-table":
             self.query_one("#snapshot", Input).value = key
             self._start_operation("inspect", "Open snapshot")

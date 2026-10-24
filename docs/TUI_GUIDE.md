@@ -29,9 +29,10 @@ using F1-F6, or use the tabs with the mouse.
 
 Without an initial CLI source, **Devices** is the first section.
 
-- **Scan Bluetooth** discovers nearby BLE devices. Filter the table, select the
-  intended adapter, then press **Use device**. The selected row supplies its
-  exact address/UUID, so devices with the same display name stay distinguishable.
+- **Scan Bluetooth** discovers nearby BLE devices, named devices first and
+  strongest signal first. Filter the table and press Enter on the intended
+  adapter to use it. The row supplies its exact address/UUID, so devices with
+  the same display name stay distinguishable.
 - A known UUID/address or unique advertised name can also be entered manually.
 - **Simulator** selects the persistent synthetic ECU; no Bluetooth is used.
 - **Offline** permits inspection, dictionary browsing and planning without a link.

@@ -43,9 +43,13 @@ def _uuid(value: str) -> str:
 
 
 def select_gatt(services: Any) -> tuple[str, Any, Any]:
-    """Only known UART pairs with the required advertised properties qualify."""
-    matches = []
+    """Only known UART pairs with the required advertised properties qualify.
+
+    Adapters may expose more than one known profile; the first profile in
+    GATT_PROFILES order wins, but it must match exactly one pair.
+    """
     for label, service_uuid, write_uuid, notify_uuid in GATT_PROFILES:
+        matches = []
         for service in services:
             if _uuid(service.uuid) != _uuid(service_uuid):
                 continue
@@ -56,12 +60,14 @@ def select_gatt(services: Any) -> tuple[str, Any, Any]:
                          if _uuid(c.uuid) == _uuid(notify_uuid)
                          and {"notify", "indicate"}.intersection(c.properties)]
             matches.extend((label, write, notify) for write in writable for notify in notifying)
-    if len(matches) != 1:
-        raise TransportError(
-            "GATT UART is unknown or ambiguous. The discovery trace contains the services; "
-            "no arbitrary characteristic was selected."
-        )
-    return matches[0]
+        if len(matches) == 1:
+            return matches[0]
+        if matches:
+            break
+    raise TransportError(
+        "GATT UART is unknown or ambiguous. The discovery trace contains the services; "
+        "no arbitrary characteristic was selected."
+    )
 
 
 def _emit(trace: Trace | None, event: str, **fields: Any) -> None:
@@ -172,6 +178,7 @@ class _PromptChannel:
         self.pending: asyncio.Future[str] | None = None
         self.buffer = bytearray()
         self._terminator_sent = False
+        self._started = False
 
     def poison(self, reason: str) -> None:
         self.poisoned = reason
@@ -185,8 +192,8 @@ class _PromptChannel:
             _emit(self.trace, "ble_rx", raw_hex=bytes(data).hex().upper(),
                   text=bytes(data).decode("ascii", errors="backslashreplace"))
             if self.pending is None or self.pending.done():
-                if not bytes(data).strip():
-                    return  # Some UARTs put trailing CR/LF in a later notification.
+                if not bytes(data).strip() or not self._started:
+                    return  # Trailing CR/LF, or a power-on banner/prompt before the first command.
                 self.poison("Unsolicited or late BLE data; reconnect before another command")
                 return
             self.buffer.extend(data)
@@ -219,6 +226,7 @@ class _PromptChannel:
             payload = (command + "\r").encode("ascii")
             _emit(self.trace, "elm_tx", command=command, raw_hex=payload.hex().upper())
             self.buffer.clear()
+            self._started = True
             self.pending = asyncio.get_running_loop().create_future()
             self._terminator_sent = False
             try:

@@ -35,7 +35,8 @@ async def test_capture_preview_apply_restore_through_buttons(tmp_path):
         await finish(app, pilot)
         assert app.last_error is None
         assert app.snapshot_path is not None
-        app.query_one("#tabs", TabbedContent).active = "change-tab"
+        assert app.query_one("#tabs", TabbedContent).active == "explore-tab"
+        await pilot.press("f4")
         await pilot.pause()
         app.query_one("#edit-byte", Input).value = "0"
         app.query_one("#edit-bit", Input).value = "0"

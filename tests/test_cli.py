@@ -93,6 +93,8 @@ def test_collect_exports_three_independent_snapshots(tmp_path):
     with zipfile.ZipFile(data["artifact"]) as archive:
         assert len([name for name in archive.namelist() if name.startswith("snapshots/")]) == 3
         assert "dictionary.json" in archive.namelist()
+    first = json.loads(Path(data["captures"][0]["artifact"]).read_text())
+    assert "F18C" in first["requested_dids"]  # Opt-in identification catalog is read on collect.
 
 
 def test_explicit_did_file_and_read_only_template(tmp_path):
@@ -109,3 +111,33 @@ def test_explicit_did_file_and_read_only_template(tmp_path):
     additions = [entry for entry in candidate["entries"] if entry["id"].startswith("candidate.")]
     assert additions
     assert all(not entry.get("writable") for entry in additions)
+
+
+def test_list_reports_newest_artifacts_for_agents(tmp_path):
+    first = json.loads(invoke(tmp_path, "--demo", "capture").stdout)
+    plan = json.loads(invoke(tmp_path, "plan", first["artifact"], "--entry", "demo.display",
+                             "--byte", "0", "--bit", "0", "--value", "0").stdout)
+    (tmp_path / "snapshots" / "broken.json").write_text("{}")
+    result = invoke(tmp_path, "list")
+    assert result.returncode == 0, result.stderr
+    listing = json.loads(result.stdout)
+    snapshots = {item["artifact"]: item for item in listing["snapshots"]}
+    assert snapshots[first["artifact"]]["complete"] is True
+    assert snapshots[first["artifact"]]["successful"] > 0
+    assert "error" in snapshots[str(tmp_path / "snapshots" / "broken.json")]
+    assert listing["plans"][0]["artifact"] == plan["artifact"]
+    assert listing["plans"][0]["eligible"] is True
+
+
+def test_real_vehicle_apply_refuses_a_non_interactive_caller(tmp_path, monkeypatch, capsys):
+    import io
+
+    from audi_workbench.cli import main
+
+    monkeypatch.setattr("sys.stdin", io.StringIO())
+    monkeypatch.setattr("audi_workbench.transport.BLELink.open",
+                        lambda self: pytest.fail("must not connect"))
+    code = main(["--data-dir", str(tmp_path), "--device", "IOS-Vlink", "apply", "plan.json",
+                 "--enable-writes", "--confirm", "WRITE 5F D100 X"])
+    assert code == 2
+    assert "interactive terminal" in capsys.readouterr().err

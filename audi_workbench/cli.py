@@ -81,6 +81,7 @@ def parser() -> argparse.ArgumentParser:
     restore.add_argument("transaction", type=Path)
     reconcile = commands.add_parser("reconcile", help="Read current state after an uncertain transaction")
     reconcile.add_argument("transaction", type=Path)
+    commands.add_parser("list", help="List saved snapshots, plans, transactions and exports in the data directory")
     commands.add_parser("export", help="Create a local support ZIP with raw logs and snapshots (includes VIN)")
     commands.add_parser("dictionary", help="Show dictionary entries and their evidence/permissions")
     template = commands.add_parser("dictionary-template", help="Draft read-only unknown entries from a snapshot")
@@ -155,7 +156,9 @@ async def _collect(args, store, dictionary):
     for ecu in ("5F", "19", "01"):
         try:
             async with Workbench(store, dictionary, _link(args, store)) as wb:
-                path = await wb.capture(ecu)
+                # The first visit to the car is scarce: also read the opt-in identification catalog.
+                path = await wb.capture(ecu, dids=[int(e["did"], 16) for e in dictionary.entries
+                                                   if e["ecu"] in ("*", ecu) and e.get("origin") is None])
             snapshot = store.read(path)
             captures.append({"ecu": ecu, "artifact": str(path), "complete": snapshot.get("complete", False),
                              "stopped_reason": snapshot.get("stopped_reason")})
@@ -164,6 +167,34 @@ async def _collect(args, store, dictionary):
     exported = store.export(dictionary.document())
     return {"captures": captures, "artifact": str(exported), "uploaded": False, "redacted": False,
             "complete": all(item["complete"] for item in captures)}
+
+
+def list_artifacts(store: Store) -> dict:
+    """Newest first, so an agent can pick the latest artifact without parsing filenames."""
+    def summary(kind: str, path: Path) -> dict:
+        try:
+            doc = store.read(path)
+        except (OSError, WorkbenchError) as exc:
+            return {"artifact": str(path), "error": str(exc)}
+        item = {"artifact": str(path), "origin": doc.get("origin", {}).get("kind"),
+                "ecu": doc.get("ecu", {}).get("key")}
+        if kind == "snapshots":
+            records = doc.get("records", {}).values()
+            item.update(captured_at=doc.get("captured_at"), complete=doc.get("complete"),
+                        successful=sum(bool(r.get("ok")) for r in records), attempted=len(records),
+                        stopped_reason=doc.get("stopped_reason"), purpose=doc.get("purpose"))
+        elif kind == "plans":
+            item.update(created_at=doc.get("created_at"), action=doc.get("action"), entry_id=doc.get("entry_id"),
+                        did=doc.get("did"), eligible=doc.get("eligible"), blocked_reasons=doc.get("blocked_reasons"))
+        else:
+            item.update(created_at=doc.get("created_at"), status=doc.get("status"), did=doc.get("did"),
+                        entry_id=doc.get("entry_id"), error=doc.get("error"))
+        return item
+    result = {"data_dir": str(store.root)}
+    for kind in ("snapshots", "plans", "transactions"):
+        result[kind] = [summary(kind, path) for path in reversed(store.files(kind))]
+    result["exports"] = [str(path) for path in sorted((store.root / "exports").glob("*.zip"), reverse=True)]
+    return result
 
 
 def draft_dictionary(snapshot_path: Path | str, output: Path | str, dictionary: Dictionary) -> Path:
@@ -218,6 +249,9 @@ def main(argv: list[str] | None = None) -> int:
         if args.value_hex is not None and (args.bit is not None or args.value is not None):
             cli.error("--hex cannot be combined with --bit or --value")
     try:
+        if args.command == "apply" and args.device and not sys.stdin.isatty():
+            # Agents and scripts may capture, inspect and plan; a person applies to the real car.
+            raise SafetyError("Real-vehicle apply needs an interactive terminal; run it yourself or use the TUI")
         if args.command == "capture":
             args.capture_dids = _capture_dids(args)
         if args.command == "scan":
@@ -240,6 +274,9 @@ def main(argv: list[str] | None = None) -> int:
         if args.command == "dictionary-template":
             path = draft_dictionary(args.snapshot, args.output, dictionary)
             emit({"artifact": str(path), "candidate_permissions": "read-only", "semantics": "unknown"})
+            return 0
+        if args.command == "list":
+            emit(list_artifacts(store))
             return 0
         if args.command == "export":
             path = store.export(dictionary.document())

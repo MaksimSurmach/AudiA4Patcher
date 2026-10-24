@@ -124,6 +124,13 @@ class GATTSelectionTests(unittest.TestCase):
         self.assertEqual(select_gatt([SimpleNamespace(uuid="ffe0", characteristics=[uart])])[1:],
                          (uart, uart))
 
+    def test_several_known_profiles_pick_the_first_listed(self):
+        vgate = SimpleNamespace(uuid="18f0", characteristics=[characteristic(), characteristic("2af0", ("notify",))])
+        uart = characteristic("bef8d6c9-9c21-4c9e-b632-bd58c1009f9f", ("write", "notify"))
+        proprietary = SimpleNamespace(uuid="e7810a71-73ae-499d-8c15-faa9aef0c3f2", characteristics=[uart])
+        self.assertEqual(select_gatt([proprietary, vgate])[0], "Vgate 18F0")
+        self.assertEqual(select_gatt([proprietary])[0], "Vgate proprietary UART")
+
     def test_unknown_or_ambiguous_gatt_is_blocked(self):
         for services in (
             [SimpleNamespace(uuid="1234", characteristics=[characteristic(), characteristic("2af0", ("notify",))])],
@@ -241,6 +248,12 @@ class PromptChannelTests(unittest.IsolatedAsyncioTestCase):
         with self.assertRaises(TransportError):
             await channel.command("22F191")
         self.assertEqual(fake.commands, ["22F190"])
+
+    async def test_banner_before_the_first_command_is_ignored(self):
+        _, _, channel = attach_link()
+        channel.receive(None, bytearray(b"\r\rELM327 v2.3\r\r>"))
+        self.assertIsNone(channel.poisoned)
+        self.assertEqual(await channel.command("ATI"), "ELM327 v2.1\r>")
 
     async def test_trailing_whitespace_is_permitted_but_late_payload_is_not(self):
         _, _, channel = attach_link()

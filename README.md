@@ -101,6 +101,26 @@ A raw `--did` plan stays blocked until an exact permitted definition is chosen.
 Keep using the same data directory: unresolved `attempting`, `unknown` and
 `verification_failed` receipts block new writes to the same ECU and VIN.
 
+## Agent use
+
+The CLI is the programmatic interface for coding agents (Claude Code, Codex)
+and scripts; the TUI is for people. Every command prints one JSON document to
+stdout and errors to stderr as `Error: ...`. Exit codes: 0 success, 2 expected
+error, 3 unverified write, 4 incomplete capture/collection, 130 interrupted.
+
+```bash
+uv run --locked audi-a4-patcher scan                                   # adapters
+uv run --locked audi-a4-patcher --data-dir ./runs/first list           # artifacts, newest first
+uv run --locked audi-a4-patcher --data-dir ./runs/first inspect PATH   # decoded + raw records
+uv run --locked audi-a4-patcher --data-dir ./runs/first --device IOS-Vlink capture --ecu 5F --did F18C
+```
+
+Traces are JSON Lines under `DATA_DIR/traces/`. Agents may scan, capture,
+collect, inspect, diff, plan and reconcile. `apply` against a real vehicle
+(`--device`) refuses to run without an interactive terminal: a person applies
+the reviewed plan themselves, in the TUI or their own shell. Simulator applies
+stay scriptable.
+
 ## Write checks and recovery limits
 
 Every write goes through one service. It requires explicit confirmation, exact

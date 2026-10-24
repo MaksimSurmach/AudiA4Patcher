@@ -32,3 +32,7 @@ framing, recovery failures and new UI interactions. Do not test implementation
 trivia. No network or hardware in tests. Respect ownership boundaries during
 parallel work. Never commit real vehicle captures or their VINs, serial numbers
 and support ZIPs. Keep simulator fixtures clearly labeled as synthetic.
+
+To operate the tool, use the JSON CLI (see README "Agent use"); start with
+`list` to find artifacts. Never work around the interactive-terminal guard on
+real-vehicle `apply`; hand the plan and its confirmation phrase to the user.

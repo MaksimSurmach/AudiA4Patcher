@@ -66,8 +66,9 @@ async def test_scan_filter_and_select_exact_device_without_connecting(tmp_path, 
     async def scan(timeout=8):
         scans.append(timeout)
         return [
-            {"name": "IOS-Vlink", "address": "uuid-one", "rssi": -30, "service_uuids": ["18f0"]},
+            {"name": "", "address": "uuid-unnamed", "rssi": -10, "service_uuids": []},
             {"name": "IOS-Vlink", "address": "uuid-two", "rssi": -40, "service_uuids": ["18f0"]},
+            {"name": "IOS-Vlink", "address": "uuid-one", "rssi": -30, "service_uuids": ["18f0"]},
         ]
 
     monkeypatch.setattr(tui, "scan_devices", scan, raising=False)
@@ -82,16 +83,18 @@ async def test_scan_filter_and_select_exact_device_without_connecting(tmp_path, 
         app.query_one("#enable-writes", Checkbox).value = True
         await click(pilot, "#scan")
         await finish(app, pilot)
-        assert app.query_one("#device-table", DataTable).row_count == 2
+        assert app.query_one("#device-table", DataTable).row_count == 3
+        # Named adapters first, then by signal strength.
+        assert [d["address"] for d in app._devices] == ["uuid-one", "uuid-two", "uuid-unnamed"]
         app.query_one("#device-filter", Input).value = "uuid-two"
         await pilot.pause()
         table = app.query_one("#device-table", DataTable)
         assert table.row_count == 1
         table.focus()
-        await pilot.press("enter")
-        assert app.query_one("#device-address", Input).value == "uuid-two"
-        await click(pilot, "#use-device")
+        await pilot.press("enter")  # Enter chooses the adapter; it still does not connect.
         await finish(app, pilot)
+        assert app.query_one("#device-address", Input).value == "uuid-two"
+        assert app.query_one("#tabs", TabbedContent).active == "capture-tab"
         assert len(scans) == 1
         assert wb.link.kind == "ble"
         assert wb.link.device == "uuid-two"
@@ -136,9 +139,8 @@ async def test_scan_escapes_terminal_controls_and_preserves_exact_selection(
         ]
         table.focus()
         await pilot.press("enter")
-        assert app.query_one("#device-address", Input).value == address
-        await click(pilot, "#use-device")
         await finish(app, pilot)
+        assert app.query_one("#device-address", Input).value == address
         assert wb.link.device == address
         assert not wb.link._ready
 
