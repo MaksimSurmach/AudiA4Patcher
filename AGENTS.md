@@ -6,9 +6,8 @@ Python 3.11+. Never imply hardware validation from simulator tests.
 Use uv for dependency management. Keep pyproject.toml and uv.lock consistent;
 generate the lock with uv, never edit it by hand. Run `uv sync --locked` to
 install. The default dependencies include Bleak and Textual; developer tools
-belong to the `dev` dependency group. Both `audi-a4-patcher` and the compatibility
-alias `audi-workbench` use the same CLI and service. The import package remains
-`audi_workbench`.
+belong to the `dev` dependency group. The command is `audi-a4-patcher`; the import
+package remains `audi_workbench`.
 
 Write application text, documentation, dictionary labels and code comments in
 English. Preserve raw vehicle values exactly even when their contents differ.

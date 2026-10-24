@@ -24,8 +24,7 @@ none establishes successful operation on this user's actual car.
 The eight optional catalog additions are `F18C`, `F17C`, `F186`, `F1AA`,
 `F1F4`, `F1AB`, `F17E` and `F1DF`. Their names and text/raw handling were
 checked in the pinned VW_Flash source. They remain read-only and have
-`read_by_default: false`; existing default captures do not expand. See
-[DICTIONARY_CATALOG.md](DICTIONARY_CATALOG.md) for the complete shipped list.
+`read_by_default: false`; existing default captures do not expand.
 
 ## User-specific evidence
 

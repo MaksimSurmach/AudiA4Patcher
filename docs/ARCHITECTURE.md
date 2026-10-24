@@ -7,8 +7,7 @@ default runtime dependencies, plus a separate developer dependency group.
 `uv.lock` records resolved cross-platform dependencies. `.python-version` pins
 the development interpreter to 3.12; supported Python versions start at 3.11.
 
-Both `audi-a4-patcher` and the compatibility name `audi-workbench` invoke
-`audi_workbench.cli:main`. With no subcommand, the CLI opens the terminal UI.
+`audi-a4-patcher` invokes `audi_workbench.cli:main`. With no subcommand, the CLI opens the terminal UI.
 Explicit CLI subcommands and `python -m audi_workbench` remain available.
 
 ## Layers
@@ -21,8 +20,7 @@ Explicit CLI subcommands and `python -m audi_workbench` remain available.
 | `dictionary.py` | Validated declarative definitions, field decoding and writable masks |
 | `store.py` | Atomic artifacts, integrity hashes, process lock, durable traces, local export |
 | `service.py` | Capture, edit plans, preflight, one-shot write/readback, restore and reconciliation |
-| `research.py` | Read-only candidate definitions from actual snapshots |
-| `cli.py` / `tui.py` | User controls over the same service; no alternative write path |
+| `cli.py` / `tui.py` | User controls over the same service; no alternative write path; `cli.py` also drafts read-only dictionary candidates |
 
 The application has no server, cloud API, telemetry or background vehicle polling.
 The TUI uses one asyncio event loop. Diagnostic operations are serialized.

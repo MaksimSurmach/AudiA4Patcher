@@ -3,13 +3,12 @@ from __future__ import annotations
 
 import json
 import math
-import os
-import tempfile
 from copy import deepcopy
 from pathlib import Path
 from typing import Any
 
 from .model import ECU, ECUS, IDENTITY_DIDS, Trace, TransportError
+from .store import atomic_write
 
 DEMO_IDENTITY = {
     "vin": b"DEMO0000000000001".hex().upper(),
@@ -44,24 +43,12 @@ def _validate_state(state: Any) -> None:
         raise ValueError("unrecognized schema")
     if not isinstance(state.get("ecus"), dict) or set(state["ecus"]) != set(ECUS):
         raise ValueError("ECU records are missing")
-    expected = _initial_state()
+    expected = _initial_state()["ecus"]
     for key, module in state["ecus"].items():
-        if not isinstance(module, dict) or not isinstance(module.get("records"), dict):
-            raise TypeError("malformed module")
-        records = module["records"]
-        for did, base in expected["ecus"][key]["records"].items():
-            if did not in records or not isinstance(records[did], str):
-                raise ValueError(f"missing record {key}/{did}")
-            try:
-                data = bytes.fromhex(records[did])
-            except ValueError as exc:
-                raise ValueError(f"invalid hex record {key}/{did}") from exc
-            if not data or len(data) != len(bytes.fromhex(base)):
-                raise ValueError(f"wrong record length {key}/{did}")
-        for did, raw in records.items():
-            if not isinstance(did, str) or len(did) != 4 or not isinstance(raw, str):
-                raise ValueError("invalid record key/value")
-            int(did, 16)
+        records = module["records"]  # Malformed shapes raise TypeError/KeyError for the caller.
+        if not set(expected[key]["records"]) <= set(records):
+            raise ValueError(f"missing records for ECU {key}")
+        for raw in records.values():
             bytes.fromhex(raw)
 
 
@@ -104,28 +91,10 @@ class DemoLink:
     def _persist(self) -> None:
         if self.state_path is None:
             return
-        path = self.state_path
-        path.parent.mkdir(parents=True, exist_ok=True, mode=0o700)
-        temporary = None
         try:
-            with tempfile.NamedTemporaryFile(mode="w", encoding="utf-8", dir=path.parent,
-                                             prefix=f".{path.name}.", delete=False) as handle:
-                temporary = Path(handle.name)
-                os.chmod(handle.name, 0o600)
-                json.dump(self.state, handle, indent=2, sort_keys=True)
-                handle.write("\n")
-                handle.flush()
-                os.fsync(handle.fileno())
-            os.replace(temporary, path)
-            # Sync the rename as well as the bytes on Unix/macOS.
-            descriptor = os.open(path.parent, os.O_RDONLY)
-            try:
-                os.fsync(descriptor)
-            finally:
-                os.close(descriptor)
+            self.state_path.parent.mkdir(parents=True, exist_ok=True, mode=0o700)
+            atomic_write(self.state_path, (json.dumps(self.state, indent=2, sort_keys=True) + "\n").encode())
         except OSError as exc:
-            if temporary is not None:
-                temporary.unlink(missing_ok=True)
             raise TransportError(f"Cannot persist simulator state: {exc}") from exc
 
     def _event(self, value: dict[str, Any]) -> None:

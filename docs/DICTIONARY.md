@@ -19,8 +19,8 @@ Optional catalog metadata:
   identity records independently of this setting.
 
 These fields do not authorize writes or prove that a controller supports a DID.
-For the actual shipped definitions and their sources, see
-[DICTIONARY_CATALOG.md](DICTIONARY_CATALOG.md).
+The shipped definitions and their sources are in
+[default.json](../audi_workbench/data/default.json); `audi-a4-patcher dictionary` prints them.
 
 Feature definitions need a complete exact `applies_to` fingerprint. All identity
 values are raw hex captured from the ECU, including padding. Required keys:

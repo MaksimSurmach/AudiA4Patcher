@@ -286,7 +286,7 @@ class BLELink:
         self.trace = trace
         self.metadata: dict[str, Any] = {
             "driver": "ble-elm327-caf1", "hardware_validated": False,
-            "max_request_bytes": 7, "long_request_support": False,
+            "max_request_bytes": self.max_request_bytes, "long_request_support": False,
         }
         self._client: Any = None
         self._notify: Any = None

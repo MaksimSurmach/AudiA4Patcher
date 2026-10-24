@@ -1,7 +1,7 @@
 import pytest
 
+from audi_workbench.cli import draft_dictionary
 from audi_workbench.dictionary import Dictionary
-from audi_workbench.research import draft_dictionary
 from audi_workbench.service import Workbench
 from audi_workbench.simulator import DemoLink
 from audi_workbench.store import Store

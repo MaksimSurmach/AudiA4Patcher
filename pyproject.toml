@@ -15,7 +15,6 @@ dev = ["pytest>=8,<10", "pytest-asyncio>=0.24,<2", "ruff>=0.9,<1"]
 
 [project.scripts]
 audi-a4-patcher = "audi_workbench.cli:main"
-audi-workbench = "audi_workbench.cli:main"
 
 [project.urls]
 Repository = "https://github.com/MaksimSurmach/AudiA4Patcher"

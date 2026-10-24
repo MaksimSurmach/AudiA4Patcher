@@ -26,6 +26,25 @@ def digest(document: dict | list) -> str:
                                      allow_nan=False).encode()).hexdigest()
 
 
+def atomic_write(path: Path, data: bytes):
+    """Durably replace path (0600): fsync the bytes, then the rename."""
+    fd, temporary = tempfile.mkstemp(prefix=".pending-", dir=path.parent)
+    try:
+        with os.fdopen(fd, "wb") as stream:
+            stream.write(data)
+            stream.flush()
+            os.fsync(stream.fileno())
+        os.replace(temporary, path)
+        directory_fd = os.open(path.parent, os.O_RDONLY)
+        try:
+            os.fsync(directory_fd)
+        finally:
+            os.close(directory_fd)
+    finally:
+        if os.path.exists(temporary):
+            os.unlink(temporary)
+
+
 class Store:
     KINDS = ("snapshots", "plans", "transactions", "traces", "exports")
 
@@ -49,23 +68,6 @@ class Store:
         finally:
             os.close(fd)
 
-    def _atomic(self, path: Path, data: bytes):
-        fd, temporary = tempfile.mkstemp(prefix=".pending-", dir=path.parent)
-        try:
-            with os.fdopen(fd, "wb") as stream:
-                stream.write(data)
-                stream.flush()
-                os.fsync(stream.fileno())
-            os.replace(temporary, path)
-            directory_fd = os.open(path.parent, os.O_RDONLY)
-            try:
-                os.fsync(directory_fd)
-            finally:
-                os.close(directory_fd)
-        finally:
-            if os.path.exists(temporary):
-                os.unlink(temporary)
-
     def save(self, kind: str, document: dict) -> Path:
         if kind not in self.KINDS or kind in ("exports", "traces"):
             raise ValueError("Invalid artifact category")
@@ -79,7 +81,7 @@ class Store:
             raise SafetyError("Artifact writes must stay in the selected data directory")
         value = dict(document)
         value["sha256"] = digest(value)
-        self._atomic(path, (json.dumps(value, indent=2, ensure_ascii=False, allow_nan=False) + "\n").encode())
+        atomic_write(path, (json.dumps(value, indent=2, ensure_ascii=False, allow_nan=False) + "\n").encode())
 
     @staticmethod
     def read(path: Path | str) -> dict:
