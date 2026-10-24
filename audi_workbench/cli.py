@@ -8,10 +8,12 @@ import json
 import os
 import sys
 from pathlib import Path
+from types import SimpleNamespace
 
 from . import __version__
 from .dictionary import SCHEMA, Dictionary
-from .model import ECUS, IDENTITY_DIDS, SafetyError, WorkbenchError
+from .model import ECUS, IDENTITY_DIDS, SafetyError, WorkbenchError, parse_hex
+from .service import Workbench
 from .store import Store, now
 
 
@@ -23,6 +25,13 @@ def hex_did(value: str) -> int:
         return number
     except ValueError as exc:
         raise argparse.ArgumentTypeError("DID must be hexadecimal, e.g. 0600 or F190") from exc
+
+
+def hex_bytes(value: str) -> bytes:
+    try:
+        return parse_hex(value)
+    except ValueError as exc:
+        raise argparse.ArgumentTypeError("Request must be complete hex bytes, e.g. 22F190") from exc
 
 
 def number(value: str) -> int:
@@ -39,16 +48,23 @@ def parser() -> argparse.ArgumentParser:
         epilog=("Default real dictionary entries are read-only. ELM CAF1 requests are limited to 7 UDS bytes "
                 "(4 bytes of a writable DID value). Long coding is read/preview only on BLE. "
                 "Snapshots are partial configuration backups, not flash images. "
-                "Without a command, the terminal interface opens. Global options precede the command. "
+                "Without a command, the terminal interface opens. Global options may precede or follow the command. "
                 "Byte/bit indexes start at zero; bit 0 is LSB."),
     )
     result.add_argument("--version", action="version", version=__version__)
-    result.add_argument("--data-dir", type=Path, default=Path.home() / ".local/share/audi-workbench")
-    result.add_argument("--dictionary", type=Path, help="Reviewed local JSON dictionary; replaces defaults")
-    mode = result.add_mutually_exclusive_group()
-    mode.add_argument("--demo", action="store_true", help="Persistent simulator; never connects to a car")
-    mode.add_argument("--device", help="Explicit BLE address/UUID or unique adapter name")
-    commands = result.add_subparsers(dest="command")
+    # Global options are accepted before or after the command; SUPPRESS keeps an
+    # absent post-command option from overwriting the pre-command value.
+    common = argparse.ArgumentParser(add_help=False)
+    for target, default in ((result, None), (common, argparse.SUPPRESS)):
+        target.add_argument("--data-dir", type=Path,
+                            default=Path.home() / ".local/share/audi-workbench" if default is None else default)
+        target.add_argument("--dictionary", type=Path, default=default,
+                            help="Reviewed local JSON dictionary; replaces defaults")
+        target.add_argument("--demo", action="store_true", default=False if default is None else default,
+                            help="Persistent simulator; never connects to a car")
+        target.add_argument("--device", default=default, help="Explicit BLE address/UUID or unique adapter name")
+    subparsers = result.add_subparsers(dest="command")
+    commands = SimpleNamespace(add_parser=lambda name, **kw: subparsers.add_parser(name, parents=[common], **kw))
     scan = commands.add_parser("scan", help="Discover BLE devices without connecting")
     scan.add_argument("--timeout", type=float, default=8.0)
     capture = commands.add_parser("capture", help="Read identification and selected DIDs; save raw evidence")
@@ -57,6 +73,9 @@ def parser() -> argparse.ArgumentParser:
     capture.add_argument("--dids-file", type=Path, help="Explicit DIDs as a JSON list or one hex DID per line; max 256")
     capture.add_argument("--only", action="store_true", help="Read identity + explicit DIDs; omit dictionary defaults")
     capture.add_argument("--dtc", action="store_true", help="Also read diagnostic trouble-code status; never clear it")
+    raw = commands.add_parser("raw", help="Send explicit read-only UDS/OBD requests (22, 19, 01, 09) in one session")
+    raw.add_argument("--ecu", choices=list(ECUS), default="5F")
+    raw.add_argument("requests", nargs="+", type=hex_bytes, help="Hex requests, e.g. 22F190 1902FF")
     commands.add_parser("collect", help="Read 5F, 19 and 01 in independent sessions, then save a support ZIP")
     inspect = commands.add_parser("inspect", help="Inspect a saved snapshot and decode known fields offline")
     inspect.add_argument("snapshot", type=Path)
@@ -120,6 +139,8 @@ async def _online(workbench, args):
             return await workbench.apply(args.plan, confirmation=args.confirm, enable_writes=args.enable_writes)
         if args.command == "reconcile":
             return await workbench.reconcile(args.transaction)
+        if args.command == "raw":
+            return await workbench.raw(args.ecu, args.requests)
     raise WorkbenchError("Unknown online operation")
 
 
@@ -149,7 +170,6 @@ def _capture_dids(args) -> list[int]:
 
 
 async def _collect(args, store, dictionary):
-    from .service import Workbench
     if not (args.demo or args.device):
         raise WorkbenchError("Choose --demo or an explicit --device before connecting")
     captures = []
@@ -243,6 +263,8 @@ def main(argv: list[str] | None = None) -> int:
     cli = parser()
     args = cli.parse_args(argv)
     args.command = args.command or "tui"
+    if args.demo and args.device:
+        cli.error("--demo and --device are mutually exclusive")
     if args.command == "plan":
         if args.byte is not None and args.value is None:
             cli.error("--byte requires --value")
@@ -252,6 +274,9 @@ def main(argv: list[str] | None = None) -> int:
         if args.command == "apply" and args.device and not sys.stdin.isatty():
             # Agents and scripts may capture, inspect and plan; a person applies to the real car.
             raise SafetyError("Real-vehicle apply needs an interactive terminal; run it yourself or use the TUI")
+        if args.command == "raw":
+            for payload in args.requests:
+                Workbench.check_raw(payload)  # Reject before opening the adapter.
         if args.command == "capture":
             args.capture_dids = _capture_dids(args)
         if args.command == "scan":
@@ -286,7 +311,6 @@ def main(argv: list[str] | None = None) -> int:
             result = asyncio.run(_collect(args, store, dictionary))
             emit(result)
             return 0 if result["complete"] else 4
-        from .service import Workbench
         wb = Workbench(store, dictionary, _link(args, store))
         if args.command == "diff":
             emit(Workbench.diff(args.before, args.after))
@@ -302,6 +326,10 @@ def main(argv: list[str] | None = None) -> int:
             except ImportError as exc:
                 raise WorkbenchError("TUI dependencies are missing. Run: uv sync --locked") from exc
             run_tui(wb)
+        elif args.command == "raw":
+            result = asyncio.run(_online(wb, args))
+            emit(result)
+            return 0 if result["complete"] else 4
         else:
             path = asyncio.run(_online(wb, args))
             result = _artifact(store, path)

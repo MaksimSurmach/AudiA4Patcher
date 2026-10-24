@@ -141,3 +141,51 @@ def test_real_vehicle_apply_refuses_a_non_interactive_caller(tmp_path, monkeypat
                  "--enable-writes", "--confirm", "WRITE 5F D100 X"])
     assert code == 2
     assert "interactive terminal" in capsys.readouterr().err
+
+
+def test_raw_reads_in_one_session_and_keeps_negative_answers(tmp_path):
+    result = invoke(tmp_path, "raw", "--demo", "--ecu", "5F", "22F190", "22BEEF", "1902FF")
+    assert result.returncode == 0, result.stderr
+    data = json.loads(result.stdout)
+    vin, missing, dtc = data["results"]
+    assert vin["ok"] and vin["response"].startswith("62F190")
+    assert bytes.fromhex(vin["data"]).startswith(b"DEMO")
+    assert not missing["ok"] and missing["nrc"] == "31"
+    assert dtc["ok"] and dtc["data"].startswith("02")
+    assert data["complete"]
+
+
+@pytest.mark.parametrize("request_hex", ["2ED10000", "3101FF00", "1101", "14FFFFFF", "2701", "1002",
+                                         "2F0600", "3E00", "22F1", "19"])
+def test_raw_refuses_everything_but_reads_before_connecting(tmp_path, request_hex):
+    result = invoke(tmp_path, "--demo", "raw", request_hex)
+    assert result.returncode == 2
+    assert "Error:" in result.stderr
+    assert not (tmp_path / "demo-state.json").exists()  # The simulator was never opened.
+
+
+def test_raw_service_guard_cannot_be_bypassed_from_python(tmp_path):
+    import asyncio
+
+    from audi_workbench.dictionary import Dictionary
+    from audi_workbench.model import SafetyError
+    from audi_workbench.service import Workbench
+    from audi_workbench.simulator import DemoLink
+    from audi_workbench.store import Store
+
+    link = DemoLink(tmp_path / "demo-state.json")
+
+    async def run():
+        async with Workbench(Store(tmp_path), Dictionary.load(), link) as wb:
+            with pytest.raises(SafetyError):
+                await wb.raw("5F", [bytes.fromhex("22F190"), bytes.fromhex("2ED10000")])
+    asyncio.run(run())
+    assert link.requests == [] and link.writes == []
+
+
+def test_global_options_work_after_the_command(tmp_path):
+    result = invoke(tmp_path, "capture", "--demo", "--ecu", "19")
+    assert result.returncode == 0, result.stderr
+    assert json.loads(result.stdout)["document"]["ecu"]["key"] == "19"
+    clash = invoke(tmp_path, "--device", "x", "list", "--demo")
+    assert clash.returncode == 2 and "mutually exclusive" in clash.stderr

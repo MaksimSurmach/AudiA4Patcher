@@ -278,11 +278,13 @@ async def _discover(timeout: float) -> list[tuple[Any, Any]]:
 
 
 async def scan_devices(timeout: float = 8.0) -> list[dict[str, Any]]:
-    return [
+    """Named devices first, strongest signal first: the OBD adapter is usually the closest."""
+    devices = [
         {"address": device.address, "name": adv.local_name or device.name or "",
          "service_uuids": list(adv.service_uuids or []), "rssi": adv.rssi}
         for device, adv in await _discover(timeout)
     ]
+    return sorted(devices, key=lambda d: (not d["name"], -(d["rssi"] if d["rssi"] is not None else -999)))
 
 
 class BLELink:

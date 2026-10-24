@@ -28,6 +28,9 @@ from .model import (
 from .store import Store, digest, now
 
 IDENTITY_NAMES = {did: name for name, did in IDENTITY_DIDS.items()}
+# Services that only read: ReadDataByIdentifier, ReadDTCInformation, OBD current data and vehicle info.
+RAW_READ_SERVICES = {0x22: "ReadDataByIdentifier", 0x19: "ReadDTCInformation",
+                     0x01: "OBD current data", 0x09: "OBD vehicle information"}
 
 
 class Workbench:
@@ -182,6 +185,54 @@ class Workbench:
             finally:
                 self.store.update(path, snapshot)
             return path
+
+    @staticmethod
+    def check_raw(payload: bytes) -> None:
+        """Raw requests are limited to read-only services; nothing else is ever sent."""
+        if not payload or payload[0] not in RAW_READ_SERVICES:
+            allowed = ", ".join(f"{sid:02X} {name}" for sid, name in RAW_READ_SERVICES.items())
+            raise SafetyError(f"Raw requests may only use read-only services ({allowed})")
+        if payload[0] == 0x22 and (len(payload) < 3 or len(payload) % 2 == 0):
+            raise SafetyError("22 needs one or more complete two-byte DIDs")
+        if payload[0] == 0x19 and len(payload) < 2:
+            raise SafetyError("19 needs a subfunction")
+
+    async def raw(self, ecu_key: str, requests: list[bytes]) -> dict:
+        """Send explicit read-only requests in order; keep every answer or error."""
+        self._online()
+        ecu = self._ecu(ecu_key)
+        if not 1 <= len(requests) <= 64:
+            raise SafetyError("Send 1 to 64 raw requests per run")
+        for payload in requests:
+            self.check_raw(payload)
+            if len(payload) > self.link.max_request_bytes:
+                raise SafetyError(f"{payload.hex().upper()} exceeds the {self.link.max_request_bytes}-byte request limit")
+        results = []
+        async with self._operation_lock:
+            for payload in requests:
+                item = {"request": payload.hex().upper()}
+                try:
+                    response = await self.link.request(ecu, payload)
+                    item["response"] = response.hex().upper()
+                    item["data"] = uds_data(response, payload).hex().upper()
+                    item["ok"] = True
+                except NegativeResponse as exc:
+                    item.update(ok=False, nrc=f"{exc.code:02X}", error=str(exc))
+                    if exc.code == 0x78:
+                        results.append(item)
+                        break
+                except NoData as exc:
+                    item.update(ok=False, error=str(exc))
+                except WorkbenchError as exc:
+                    # Broken framing or a lost link: the command stream must not be reused.
+                    item.update(ok=False, error=str(exc), stopped=True)
+                    results.append(item)
+                    break
+                results.append(item)
+                if self.link.kind != "demo":
+                    await asyncio.sleep(0.35)
+        return {"ecu": ecu.as_dict(), "origin": self.link.kind, "results": results,
+                "complete": len(results) == len(requests), "trace_file": str(self.store.trace_path)}
 
     @staticmethod
     def edit_value(before: bytes, *, value_hex: str | None = None, byte: int | None = None,

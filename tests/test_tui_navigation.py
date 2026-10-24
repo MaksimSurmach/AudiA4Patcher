@@ -84,8 +84,6 @@ async def test_scan_filter_and_select_exact_device_without_connecting(tmp_path, 
         await click(pilot, "#scan")
         await finish(app, pilot)
         assert app.query_one("#device-table", DataTable).row_count == 3
-        # Named adapters first, then by signal strength.
-        assert [d["address"] for d in app._devices] == ["uuid-one", "uuid-two", "uuid-unnamed"]
         app.query_one("#device-filter", Input).value = "uuid-two"
         await pilot.pause()
         table = app.query_one("#device-table", DataTable)

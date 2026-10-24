@@ -34,5 +34,7 @@ parallel work. Never commit real vehicle captures or their VINs, serial numbers
 and support ZIPs. Keep simulator fixtures clearly labeled as synthetic.
 
 To operate the tool, use the JSON CLI (see README "Agent use"); start with
-`list` to find artifacts. Never work around the interactive-terminal guard on
-real-vehicle `apply`; hand the plan and its confirmation phrase to the user.
+`list` to find artifacts. Use `raw` for ad-hoc reads and `capture --did` for
+evidence worth keeping. Never work around the read-only `raw` whitelist or the
+interactive-terminal guard on real-vehicle `apply`; hand the plan and its
+confirmation phrase to the user.

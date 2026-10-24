@@ -341,9 +341,7 @@ class WorkbenchApp(App):
                 self._devices = []
                 self._show_devices()
                 self.query_one("#device-count", Static).update("Scanning Bluetooth…")
-                # Named adapters first, strongest signal first: the OBD dongle is usually the closest device.
-                self._devices = sorted(await scan_devices(),
-                                       key=lambda d: (not d.get("name"), -(d.get("rssi") or -999)))
+                self._devices = await scan_devices()
                 self._show_devices()
                 self._status(f"Found {len(self._devices)} devices. Select an adapter by its exact address.")
             elif action in ("use-device", "simulator", "offline"):

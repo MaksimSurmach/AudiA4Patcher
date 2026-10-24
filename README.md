@@ -79,8 +79,8 @@ and evidence; see the [dictionary contract](docs/DICTIONARY.md) and
 
 ## CLI
 
-Global options (`--data-dir`, `--device`, `--demo`, `--dictionary`) go **before**
-the subcommand. Output is JSON.
+Global options (`--data-dir`, `--device`, `--demo`, `--dictionary`) may go before
+or after the subcommand. Output is JSON.
 
 ```bash
 uv run --locked audi-a4-patcher inspect SNAPSHOT.json
@@ -106,20 +106,52 @@ Keep using the same data directory: unresolved `attempting`, `unknown` and
 The CLI is the programmatic interface for coding agents (Claude Code, Codex)
 and scripts; the TUI is for people. Every command prints one JSON document to
 stdout and errors to stderr as `Error: ...`. Exit codes: 0 success, 2 expected
-error, 3 unverified write, 4 incomplete capture/collection, 130 interrupted.
+error (nothing unsafe happened), 3 unverified write, 4 incomplete
+capture/collection/raw run, 130 interrupted.
+
+| Command | Connects | Purpose |
+|---|---|---|
+| `scan` | BLE scan only | Adapters, named and strongest first |
+| `collect` | yes | 5F, 19, 01: identity, coding, catalog; support ZIP |
+| `capture --ecu K [--did D ...] [--dtc]` | yes | One ECU, dictionary reads plus explicit DIDs |
+| `raw --ecu K REQ ...` | yes | Explicit read-only requests in one session |
+| `list` | no | Snapshots, plans, transactions, exports, newest first |
+| `inspect` / `diff` / `dictionary` | no | Decode, compare, show definitions |
+| `plan` / `restore` | no | Preview a change; never writes |
+| `reconcile` | yes | Read-only check after an uncertain write |
+| `apply` | yes | One guarded write; a person runs it on a real car |
 
 ```bash
-uv run --locked audi-a4-patcher scan                                   # adapters
-uv run --locked audi-a4-patcher --data-dir ./runs/first list           # artifacts, newest first
-uv run --locked audi-a4-patcher --data-dir ./runs/first inspect PATH   # decoded + raw records
-uv run --locked audi-a4-patcher --data-dir ./runs/first --device IOS-Vlink capture --ecu 5F --did F18C
+A="uv run --locked audi-a4-patcher --data-dir ./runs/first"
+$A scan
+$A collect --device IOS-Vlink
+$A raw --device IOS-Vlink --ecu 5F 22F190 22F187 220600 1902FF
+$A list
+$A inspect SNAPSHOT.json
 ```
 
-Traces are JSON Lines under `DATA_DIR/traces/`. Agents may scan, capture,
-collect, inspect, diff, plan and reconcile. `apply` against a real vehicle
-(`--device`) refuses to run without an interactive terminal: a person applies
-the reviewed plan themselves, in the TUI or their own shell. Simulator applies
-stay scriptable.
+`raw` accepts only read-only services: `22` ReadDataByIdentifier, `19`
+ReadDTCInformation, and OBD `01`/`09`. Anything else, including session
+changes, SecurityAccess, routines, resets, DTC clearing and writes, is refused
+before the adapter is opened. Each request gets its own result (`ok`, `response`,
+`data` or `nrc`/`error`); a negative answer does not stop the run, broken
+framing or a lost link does (`stopped: true`). Requests are at most 7 bytes on
+BLE. Raw results are printed, not saved as snapshots; the trace keeps the
+traffic. For repeatable evidence prefer `capture --did`, which saves a snapshot
+that `inspect`, `diff` and `plan` can use.
+
+Known ECU keys are `01`, `19` and `5F`; other modules need a reviewed address
+in `model.py` first. Nothing here is hardware-validated until the first
+`collect` from the car succeeds.
+
+`apply` against a real vehicle (`--device`) refuses to run without an
+interactive terminal: agents prepare and explain the plan, a person applies it
+in the TUI or their own shell. Simulator applies stay scriptable.
+
+Bluetooth access belongs to the terminal app that runs the agent (macOS
+Privacy & Security > Bluetooth). An agent sandbox may block Bluetooth: if `scan`
+fails inside the agent but works in your own terminal, allow the agent to run
+this command outside its sandbox.
 
 ## Write checks and recovery limits
 

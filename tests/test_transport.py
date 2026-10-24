@@ -11,7 +11,7 @@ from audi_workbench.model import ECUS, NegativeResponse, NoData, ProtocolError, 
 from audi_workbench.service import Workbench
 from audi_workbench.simulator import DemoLink
 from audi_workbench.store import Store
-from audi_workbench.transport import BLELink, _PromptChannel, parse_elm_response, select_gatt
+from audi_workbench.transport import BLELink, _PromptChannel, parse_elm_response, scan_devices, select_gatt
 
 MIXED_NO_DATA = (
     "7DD 10 0A 62 F1 90 01 02 03\rNO DATA\r>",
@@ -110,6 +110,16 @@ class ISOTransportParsingTests(unittest.TestCase):
 
 def characteristic(uuid="2af1", properties=("write",), capacity=20):
     return SimpleNamespace(uuid=uuid, properties=list(properties), max_write_without_response_size=capacity)
+
+
+class ScanOrderTests(unittest.IsolatedAsyncioTestCase):
+    async def test_named_and_strongest_devices_come_first(self):
+        found = [(SimpleNamespace(address=a, name=n), SimpleNamespace(local_name=n, service_uuids=[], rssi=r))
+                 for a, n, r in (("unnamed", "", -10), ("far", "IOS-Vlink", -80), ("near", "IOS-Vlink", -40),
+                                 ("silent", "Phone", None))]
+        with patch("audi_workbench.transport._discover", AsyncMock(return_value=found)):
+            devices = await scan_devices(1)
+        self.assertEqual([d["address"] for d in devices], ["near", "far", "silent", "unnamed"])
 
 
 class GATTSelectionTests(unittest.TestCase):
