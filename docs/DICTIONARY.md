@@ -1,5 +1,10 @@
 # Dictionary contract
 
+This contract governs executable read/write definitions. The separate
+`audi-workbench.library/v1` research catalog is described in
+[LIBRARY.md](LIBRARY.md). Research statuses and named CSV observations never
+become write permissions automatically.
+
 Top-level `schema` is `audi-workbench.dictionary/v1`; `entries` is an array.
 `--dictionary FILE` loads that complete file. It does not silently merge files.
 `dictionary-template` includes the current definitions plus read-only candidates.

@@ -1,0 +1,3141 @@
+{
+  "schema": "audi-workbench.library/v1",
+  "version": "2026.10.24.1",
+  "researched_at": "2026-10-24",
+  "scope": "Delphi MHS2 coding/adaptation research with explicit related-family exclusions; not exhaustive or vehicle-verified.",
+  "index_base": 0,
+  "target_reference": {
+    "model": "Audi A4 B9 2017 / MLB evo",
+    "part_number": "8W0 035 193 G",
+    "component": "MU-HS-LN-EU",
+    "software_train": "MHS2_ER_AU_P0470",
+    "mu_version": "0191",
+    "asam": "EV_MUHigScl6C3DELP",
+    "origin": "Prior owner context; must be checked against a current capture.",
+    "instrument_cluster": "8W5 920 741 A / PR 9S5 monochrome; prior owner context, confirm hardware"
+  },
+  "methodology": [
+    "Original owner reports, diagnostic vendor documentation, manufacturer bulletins and original project sources.",
+    "Forum recipes and reposts are evidence, never exact target verification or write authorization.",
+    "Raw record address evidence is separate from proposed byte/bit meaning; unknown mappings remain null.",
+    "No private scans, full forum archives, proprietary definitions, firmware or activation payloads are bundled."
+  ],
+  "research_gaps": [
+    "Exact target adaptation and raw maps are still needed.",
+    "Ross-Tech full 5F maps could not be retrieved; source records remain excerpt-only.",
+    "The historical translated guide URL redirects to unrelated content and is not primary support.",
+    "Reported camera defaults and display/audio outcomes depend on equipment and software."
+  ],
+  "sources": [
+    {
+      "id": "a4k-us-eu",
+      "url": "https://a4-klub.pl/topic/505166-konwersja-mhs2-z-usa-na-europ%C4%99-w-audi-a4-b9/",
+      "title": "MHS2 US-to-Europe conversion in Audi A4 B9",
+      "kind": "original_owner_forum",
+      "access": "full",
+      "family_evidence": "Owner explicitly identifies MHS2; profile identifies A4 B9 2017.",
+      "identity_evidence": {
+        "software_trains": [
+          "MHS2_EU_AU_P2037",
+          "MHS2_ER_A_P2035"
+        ],
+        "mu_versions": [
+          "0185"
+        ],
+        "part_number": null,
+        "asam": null
+      },
+      "independence_group": "owner-mrowa06",
+      "notes": "July 2025. Firmware spellings retained as posted. Coding was concurrent with other modifications; effects are not isolated. No scripts, payloads, or full coding dumps retained.",
+      "retrieved_at": "2026-10-24"
+    },
+    {
+      "id": "a4k-fis",
+      "url": "https://a4-klub.pl/topic/497268-mhs2-mapy-2023-w-audi-a4-b9/",
+      "title": "MHS2 maps and small color FIS in Audi A4 B9",
+      "kind": "original_owner_forum",
+      "access": "full",
+      "family_evidence": "Jari1234567 identifies small Delphi SD navigation and P2035 in an A4 B9 thread.",
+      "identity_evidence": {
+        "software_trains": [
+          "P2035 (success-report author uses shorthand only)"
+        ],
+        "mu_versions": [],
+        "model": "A4 B9",
+        "year": 2018,
+        "part_number": null,
+        "asam": null
+      },
+      "independence_group": "owner-jari1234567",
+      "notes": "February 2024 owner success report. Three display fields and RDID $0B5A are explicit; raw layout absent. The thread opener's full train/MU0235 are not assigned to the later success-report author.",
+      "retrieved_at": "2026-10-24"
+    },
+    {
+      "id": "deb-si52",
+      "url": "https://www.digital-eliteboard.com/threads/delphi-audi-mhs2-patchen-patches-scripts-android-auto-apple-carplay-map-update-solution.493931/page-52",
+      "title": "Delphi MHS2 support, posts 776–780",
+      "kind": "original_owner_forum",
+      "access": "full",
+      "family_evidence": "MHS2-specific support thread; owner explicitly follows Delphi_MHS2_Solution.pdf.",
+      "identity_evidence": {
+        "software_trains": [],
+        "mu_versions": [],
+        "usb_part_numbers": [
+          "8W0.035.736",
+          "82A.035.736"
+        ],
+        "part_number": null,
+        "asam": null,
+        "reported_version_strings": [
+          "v243 (owner notation; version type unspecified)"
+        ]
+      },
+      "independence_group": "owner-spax279-guide-derived",
+      "notes": "March 2024 failed CarPlay case. The channel recipe is copied from the guide, not independent validation of it. USB hardware descriptions and failure are firsthand.",
+      "retrieved_at": "2026-10-24"
+    },
+    {
+      "id": "deb-si53",
+      "url": "https://www.digital-eliteboard.com/threads/delphi-audi-mhs2-patchen-patches-scripts-android-auto-apple-carplay-map-update-solution.493931/page-53",
+      "title": "Delphi MHS2 support, USB coding and continued failure",
+      "kind": "original_owner_forum",
+      "access": "full",
+      "family_evidence": "MHS2-specific thread; ATKA reports an actual coding job, but omits unit identity.",
+      "identity_evidence": {
+        "software_trains": [],
+        "part_number": null,
+        "asam": null
+      },
+      "independence_group": "owner-atka-and-spax279",
+      "notes": "Posts 781/784 report USB field settings and external-media selection. Post 785: both USB sockets play music but CarPlay still fails. No success is attributed to that failing owner.",
+      "retrieved_at": "2026-10-24"
+    },
+    {
+      "id": "deb-talk62",
+      "url": "https://www.digital-eliteboard.com/threads/audi-delphi-mhs2-mib-hs-patchen-talk-thread-diskussionen-zum-patchen-updaten-freischalten.492100/page-62",
+      "title": "Delphi MHS2 discussion, ASI icon but charge-only result",
+      "kind": "original_owner_forum",
+      "access": "full",
+      "family_evidence": "MHS2-specific thread; exact owner part/train absent.",
+      "identity_evidence": {
+        "software_trains": [],
+        "part_number": null,
+        "asam": null
+      },
+      "independence_group": "owner-martin7676",
+      "notes": "May 2022, posts 916–920. Reports named channels, external-media connections and USB coding; no successful Android Auto result. Some channel labels have visible transcription errors.",
+      "retrieved_at": "2026-10-24"
+    },
+    {
+      "id": "deb-usb21",
+      "url": "https://www.digital-eliteboard.com/threads/einbau-doppel-usb-port-fragen.491806/page-21",
+      "title": "Dual USB retrofit: Delphi MHS2 communication failure",
+      "kind": "original_owner_forum",
+      "access": "full",
+      "family_evidence": "kalax explicitly calls the unit Delphi MHS2.",
+      "identity_evidence": {
+        "software_trains": [],
+        "part_number": null,
+        "asam": null
+      },
+      "independence_group": "owner-kalax",
+      "notes": "May 2022 post 309: usb_ipod at byte 19 bits 6–7 yet USB media unavailable and U11B8 reported. Demonstrates that coding and USB power do not establish a working data connection.",
+      "retrieved_at": "2026-10-24"
+    },
+    {
+      "id": "aw-usb20",
+      "url": "https://www.audiworld.com/forums/a4-b9-platform-discussion-212/usb-port-retrofit-3014382/page20/",
+      "title": "USB port retrofit, original Delphi P2035 completion report",
+      "kind": "original_owner_forum",
+      "access": "excerpt",
+      "family_evidence": "Aloakos explicitly identifies Delphi MHS2_ER_AU_P2035.",
+      "identity_evidence": {
+        "software_trains": [
+          "MHS2_ER_AU_P2035"
+        ],
+        "usb_part_numbers": [
+          "8W0035708"
+        ],
+        "part_number": null,
+        "asam": null
+      },
+      "independence_group": "owner-aloakos",
+      "notes": "November 2025 post 194 reports hardware retrofit, prior feature activation and coding followed by working ASI. Search indexed full post; direct open returned 403. Do not treat as independent proof that coding alone activates licensed features.",
+      "retrieved_at": "2026-10-24"
+    },
+    {
+      "id": "mrfix-gem",
+      "url": "https://www.youtube.com/watch?v=0lEafW2LT6U",
+      "title": "Audi Q5 (FY) MMI MHS2 hidden green menu (GEM)",
+      "kind": "original_demonstrator_description",
+      "access": "excerpt",
+      "family_evidence": "Creator explicitly identifies the demonstrated Q5 FY as MHS2.",
+      "identity_evidence": {
+        "model": "Q5 FY",
+        "software_trains": [],
+        "part_number": null,
+        "asam": null
+      },
+      "independence_group": "mr-fix-gem",
+      "notes": "Original mr-fix publication, 2021-11-30. Search retrieved creator description; direct video fetch failed. Video itself was not watched.",
+      "retrieved_at": "2026-10-24"
+    },
+    {
+      "id": "mrfix-dsm",
+      "url": "https://www.youtube.com/watch?v=rQd_Lzur7PU",
+      "title": "Audi Q5 (FY) MMI MHS2 driving school mode activation",
+      "kind": "original_demonstrator_description",
+      "access": "excerpt",
+      "family_evidence": "Creator explicitly identifies MHS2 / MIB2 High Scale in Q5 FY.",
+      "identity_evidence": {
+        "model": "Q5 FY",
+        "software_trains": [],
+        "part_number": null,
+        "asam": null
+      },
+      "independence_group": "mr-fix-dsm",
+      "notes": "Original mr-fix publication, 2021-12-02. Four channel labels and values are in the creator description. A4 transfer and exact raw encoding remain untested.",
+      "retrieved_at": "2026-10-24"
+    },
+    {
+      "id": "a4k-logo1",
+      "url": "https://a4-klub.pl/topic/507235-problem-po-konwersji-mhs2-z-usa-na-europ%C4%99-w-audi-a3-8v/",
+      "title": "MHS2 A3 conversion: startup graphic mismatch",
+      "kind": "original_owner_forum",
+      "access": "full",
+      "family_evidence": "Owner explicitly identifies MHS2_ER_AU_P2035, on A3 8V.",
+      "identity_evidence": {
+        "model": "A3 8V",
+        "year": 2020,
+        "software_trains": [
+          "MHS2_ER_AU_P2035"
+        ],
+        "part_number": null,
+        "asam": null
+      },
+      "independence_group": "owner-nuswiktor",
+      "notes": "March 2026. Byte position and numeric representations are inconsistent. A resource-table number and a coding byte value are not assumed equivalent. Not an A4 lookup table.",
+      "retrieved_at": "2026-10-24"
+    },
+    {
+      "id": "a4k-logo3",
+      "url": "https://a4-klub.pl/topic/507235-problem-po-konwersji-mhs2-z-usa-na-europ%C4%99-w-audi-a3-8v/page/3/",
+      "title": "MHS2 A3 conversion: station-logo mode does not supply logos",
+      "kind": "original_owner_forum",
+      "access": "full",
+      "family_evidence": "Continuation of explicit MHS2 case; July post identifies a second converted A3 unit.",
+      "identity_evidence": {
+        "model": "A3 8V",
+        "software_trains": [],
+        "part_number": "8V1 035 652 D",
+        "hardware_part_number": "8V1 035 652",
+        "component": "MU-HS-S-US 050 0235",
+        "dataset": "8V1909545Q 0030",
+        "asam": null
+      },
+      "independence_group": "owner-nuswiktor",
+      "notes": "July 2026. Owner reports 0→1 accepted, logo-related menu appears, logos still absent. Linked adaptation CSV returned 403 and was not read; VIN and filename containing VIN omitted.",
+      "retrieved_at": "2026-10-24"
+    },
+    {
+      "id": "aw-rvc",
+      "url": "https://www.audiworld.com/forums/a4-b9-platform-discussion-212/a4-b9-rearview-camera-coding-3004602/",
+      "title": "A4 B9 rear-view camera retrofit with identified Delphi 5F",
+      "kind": "original_owner_forum_with_scan",
+      "access": "excerpt",
+      "family_evidence": "Owner 5F scan identifies MU-HS-S-US and Delphi ASAM.",
+      "identity_evidence": {
+        "model": "A4 B9",
+        "year": 2017,
+        "part_number": "8W0 035 652 N",
+        "hardware_part_number": "8W0 035 652 B",
+        "component": "MU-HS-S-US",
+        "software_version": "0118",
+        "hardware_version": "040",
+        "asam": "EV_MUHigScl6C3DELP",
+        "asam_version": "001011",
+        "camera_part_number": "4M0 980 556 A"
+      },
+      "independence_group": "owner-ionhincesti",
+      "notes": "September 2020 posts 4–9. Owner confirms four defaults, two prior changes; final fix was in the camera controller. Direct open 403, indexed original posts available. No full scans retained.",
+      "retrieved_at": "2026-10-24"
+    },
+    {
+      "id": "audi-tsb-hs",
+      "url": "https://static.nhtsa.gov/odi/tsbs/2019/MC-10161670-0001.pdf",
+      "title": "Audi TSB 2050565/2: MIB2 High Scale software-update instructions",
+      "kind": "manufacturer_document",
+      "access": "full",
+      "family_evidence": "Audi distinguishes MIB2 High Scale PR 7UH from A3 MIB2 Standard.",
+      "identity_evidence": {
+        "document_number": "2050565/2",
+        "document_date": "2019-06-18",
+        "part_number": null,
+        "asam": null
+      },
+      "independence_group": "audi-tsb-2050565",
+      "notes": "The US-market bulletin associates PR 7UH with scale without navigation and discusses ODIS/SVM updating, including coding, parameterization and adaptations. This is identity/process context, not a coding map or universal equipment rule.",
+      "retrieved_at": "2026-10-24"
+    },
+    {
+      "id": "mib-scope",
+      "url": "https://github.com/Mr-MIBonk/M.I.B._More-Incredible-Bash",
+      "title": "M.I.B. repository supported-family statement",
+      "kind": "original_project_documentation",
+      "access": "full",
+      "family_evidence": "Project explicitly targets Harman MIB 2.x / MHI2(Q).",
+      "identity_evidence": {
+        "supported_families": [
+          "MHI2",
+          "MHI2Q"
+        ],
+        "part_number": null,
+        "asam": null
+      },
+      "independence_group": "mib-project",
+      "notes": "Used only to reject transplantation of Harman procedures into Delphi MHS2. No executable patching material copied.",
+      "retrieved_at": "2026-10-24"
+    },
+    {
+      "id": "a4k-193g-scan",
+      "url": "https://a4-klub.pl/topic/496104-kodowanie-haka-w-audi-a4-b9/page/2/",
+      "title": "A4 B9 public scan containing 8W0 035 193 G",
+      "kind": "original_owner_scan",
+      "access": "full",
+      "family_evidence": "5F scan identifies MU-HS-LN-EU and EV_MUHigScl6C3DELP.",
+      "identity_evidence": {
+        "model": "A4 B9",
+        "year": 2017,
+        "part_number": "8W0 035 193 G",
+        "hardware_part_number": "8W0 035 193 A",
+        "component": "MU-HS-LN-EU 045 0191",
+        "dataset": "8W0909545AA 0039",
+        "asam": "EV_MUHigScl6C3DELP",
+        "asam_version": "001011",
+        "label_file": "8W0-035-MIB-HGS2.clb",
+        "software_trains": []
+      },
+      "independence_group": "owner-robson760",
+      "notes": "December 2023 scan. Supports identity association, not channel mappings or a known P0470 firmware train. VIN, serials and full coding omitted.",
+      "retrieved_at": "2026-10-24"
+    },
+    {
+      "id": "deb-p0470",
+      "url": "https://www.digital-eliteboard.com/threads/vcds-20-12-0-software-versionsfehler-security-code-hidden-menue.495293/",
+      "title": "Mixed-family hidden-menu thread with exact P0470 owner reply",
+      "kind": "original_owner_forum",
+      "access": "full",
+      "family_evidence": "Only fafki post 6 identifies A4 B9 2017 / MHS2_ER_AU_P0470 / MU0191.",
+      "identity_evidence": {
+        "model": "A4 B9",
+        "year": 2017,
+        "software_trains": [
+          "MHS2_ER_AU_P0470"
+        ],
+        "mu_versions": [
+          "0191"
+        ],
+        "part_number": null,
+        "asam": null
+      },
+      "independence_group": "owner-fafki",
+      "notes": "March 2021. Earlier detailed discussion uses MHI2 and must not be assigned to this MHS2 reply. Diagnostic login/session instructions are not promoted to target-verified procedures.",
+      "retrieved_at": "2026-10-24"
+    },
+    {
+      "id": "aw-dualnav",
+      "url": "https://www.audiworld.com/forums/q7-mkii-discussion-211/update-mmi-fw-get-unlimited-map-updates-3043895/page4/",
+      "title": "A5 P2035 small-cluster map configuration unsuccessful report",
+      "kind": "original_owner_forum",
+      "access": "excerpt",
+      "family_evidence": "toomanybuttonss identifies A5 2019 / MHS2_ER_AU_P2035.",
+      "identity_evidence": {
+        "model": "A5",
+        "year": 2019,
+        "software_trains": [
+          "MHS2_ER_AU_P2035"
+        ],
+        "part_number": null,
+        "asam": null
+      },
+      "independence_group": "owner-toomanybuttonss",
+      "notes": "July 2024 post 33 reports the same three display fields but compass only while attempting simultaneous navigation. Not independent from this owner's GitHub repost. Direct open 403.",
+      "retrieved_at": "2026-10-24"
+    },
+    {
+      "id": "guide-dead-url",
+      "url": "https://a4b9.ro/manuale/Delphi_MHS2_Solution_en.pdf",
+      "title": "Delphi MHS2 Solution English translation (historical indexed excerpt)",
+      "kind": "third_party_translated_repost",
+      "access": "excerpt",
+      "family_evidence": "Indexed title and passage explicitly say Delphi MHS2.",
+      "identity_evidence": {
+        "part_number": null,
+        "asam": null,
+        "software_trains": []
+      },
+      "independence_group": "terrormolch-guide-reposts",
+      "notes": "Live URL redirects to unrelated casino page. Indexed adaptation excerpt only; no live PDF read. Scribd copies are the same guide family, not independent evidence.",
+      "eligible_as_primary_support": false,
+      "retrieved_at": "2026-10-24"
+    },
+    {
+      "id": "maps_src_red",
+      "url": "https://www.youtube.com/watch?v=MdId5Y4Wdhw",
+      "title": "Audi Q5 (FY) MMI MHS2 red engineering hidden menu",
+      "kind": "original_video",
+      "access": "excerpt",
+      "family_evidence": "Creator explicitly identifies MHS2 on Q5 FY.",
+      "identity_evidence": "No exact part/SW/ASAM in retrieved description.",
+      "notes": "mr-fix, 2021-11-29.",
+      "retrieved_at": "2026-10-24"
+    },
+    {
+      "id": "maps_src_audio_owner",
+      "url": "https://www.audi-sport.net/xf/threads/436166/",
+      "title": "Enabling Audi Sound System and subwoofer control without VCP - FL success",
+      "kind": "original_forum_report",
+      "access": "full",
+      "family_evidence": "Author names MHS2 with a qualification; a separate owner explicitly reports A4 B9 MHS2 success.",
+      "identity_evidence": "Initial post lacks part/ASAM and writes MU 2103; preserve this unverified number.",
+      "notes": "Oli250 #1 and independent owner #20; later discussion also includes High units and must not be merged indiscriminately.",
+      "retrieved_at": "2026-10-24"
+    },
+    {
+      "id": "maps_src_audio_a3",
+      "url": "https://cartechnology.co.uk/printthread.php?tid=74191",
+      "title": "Subwoofer control for Audi A3 8V Facelift MHS2",
+      "kind": "original_forum_report",
+      "access": "excerpt",
+      "family_evidence": "Explicit MHS2_ER_AU_P2035_MU0235.",
+      "identity_evidence": "2019 A3 8V; part 81A035192E; no ASAM.",
+      "notes": "rehatflogs #1 failure and #3 follow-up success; cached text retrieved, direct open returned 403.",
+      "retrieved_at": "2026-10-24"
+    },
+    {
+      "id": "maps_src_audio_research",
+      "url": "https://mqb-blog.com/en/2022/02/21/sound-dataset/",
+      "title": "Research of MIB2 Sound Datasets",
+      "kind": "original_reverse_engineering",
+      "access": "full",
+      "family_evidence": "MIB2 generally; no MHS2 identity established in the inspected passage.",
+      "identity_evidence": "Internal amplifier installations; PR 8RE, 8RM and 9VD; external MOST amplifiers excluded.",
+      "notes": "Original research cited by subsequent owners, not independent confirmation of every subsequent unit.",
+      "retrieved_at": "2026-10-24"
+    },
+    {
+      "id": "maps_src_camera_b9",
+      "url": "https://a4-klub.pl/topic/438440-monta%C5%BC-kamery-cofania-w-a4-b9/page/4/",
+      "title": "Montaż kamery cofania w A4 B9, page 4",
+      "kind": "original_forum_troubleshooting",
+      "access": "full",
+      "family_evidence": "Only B9 established on this page; exact MHS2 train not shown.",
+      "identity_evidence": "2017 A4 B9; attached map filename identifies 8W0-035-193-K, but attachment content was unavailable.",
+      "notes": "Adam68 and Muskel1, 2024-04-06. Readable posts identify individual changes and a reported recovery.",
+      "retrieved_at": "2026-10-24"
+    },
+    {
+      "id": "maps_src_audiworld_original",
+      "url": "https://www.audiworld.com/forums/a4-b9-platform-discussion-212/2017-a4-coding-tweaks-2898879/",
+      "title": "2017 A4 coding tweaks, original posts",
+      "kind": "original_forum_report",
+      "access": "excerpt",
+      "family_evidence": "A4 B9/MIB2 only, not an explicit MHS2 match.",
+      "identity_evidence": "US A4 B9; exact part/SW/ASAM missing.",
+      "notes": "DirkM #1 and #7. Audizine repeats this material, so these are one evidence lineage.",
+      "retrieved_at": "2026-10-24"
+    },
+    {
+      "id": "maps_src_audiworld_map",
+      "url": "https://www.audiworld.com/forums/a4-b9-platform-discussion-212/2017-a4-coding-tweaks-2898879/page48/",
+      "title": "2017 A4 coding tweaks, page 48 adaptation listing",
+      "kind": "original_forum_map",
+      "access": "excerpt",
+      "family_evidence": "Generic B9/MIB2; no source header proving MHS2 retrieved.",
+      "identity_evidence": "Mitchfin #475 lists US configuration; exact part/SW/ASAM absent in inspected extract.",
+      "notes": "#473 reports harmful differences when copying a Canadian configuration wholesale.",
+      "retrieved_at": "2026-10-24"
+    },
+    {
+      "id": "maps_src_audiworld_simmap",
+      "url": "https://www.audiworld.com/forums/a4-b9-platform-discussion-212/2017-a4-coding-tweaks-2898879/page18/",
+      "title": "2017 A4 coding tweaks, page 18 adaptation listing",
+      "kind": "original_forum_map",
+      "access": "excerpt",
+      "family_evidence": "Generic B9/MIB2 only.",
+      "identity_evidence": "Exact part/SW/ASAM not established.",
+      "notes": "Contains IDE10668 and a reported automatic value; not independent confirmation of original thread author.",
+      "retrieved_at": "2026-10-24"
+    },
+    {
+      "id": "maps_src_audizine",
+      "url": "https://www.audizine.com/threads/vcds-mods-for-b9.721197/",
+      "title": "VCDS mods for B9",
+      "kind": "forum_compilation",
+      "access": "full",
+      "family_evidence": "B9 and Q7 4M compilation; no explicit MHS2 identity for listed recipes.",
+      "identity_evidence": "Exact part/SW/ASAM missing.",
+      "notes": "DirtD1ver #17 says not all recipes were tried and some accepted coding without the intended result. It cites AudiWorld/Ross-Tech and is not independent corroboration.",
+      "retrieved_at": "2026-10-24"
+    },
+    {
+      "id": "maps_src_rs_monitor",
+      "url": "https://www.vag-coding.net/audi/a4-b9/a4-b9-activate-rs-monitor-on-the-mmi/",
+      "title": "A4 (B9) - Activate RS Monitor on the MMI",
+      "kind": "scoped_coding_tutorial",
+      "access": "excerpt",
+      "family_evidence": "Explicit scope is MH2P or MIB3, 2019 onward; MHS2 is not included.",
+      "identity_evidence": "No exact part/SW/ASAM or target test.",
+      "notes": "Used only to quarantine family-specific recipes; not proof that every equivalent MHS2 feature is impossible.",
+      "retrieved_at": "2026-10-24"
+    },
+    {
+      "id": "maps_src_legacy_3g",
+      "url": "https://mr-fix.info/mmi-hidden-green-menu-2g-3g/",
+      "title": "Enable MMI hidden green menu (2G, 3G, 3G+)",
+      "kind": "original_tutorial",
+      "access": "excerpt",
+      "family_evidence": "Explicit 2G/3G/3G+ scope.",
+      "identity_evidence": "No MHS2 identity.",
+      "notes": "Used to reject numeric legacy-channel substitution.",
+      "retrieved_at": "2026-10-24"
+    },
+    {
+      "id": "maps_src_legacy_rmc",
+      "url": "https://mr-fix.info/audi-rmc-hidden-green-menu/",
+      "title": "Audi RMC hidden green menu",
+      "kind": "original_tutorial",
+      "access": "excerpt",
+      "family_evidence": "Explicit RMC scope.",
+      "identity_evidence": "No MHS2 identity.",
+      "notes": "Used to reject numeric legacy-channel substitution.",
+      "retrieved_at": "2026-10-24"
+    },
+    {
+      "id": "maps_src_ross_map",
+      "url": "https://www.ross-tech.com/vcds/tour/controller-channels-map.php",
+      "title": "VCDS Tour - Controller Channels Map",
+      "kind": "diagnostic_vendor_documentation",
+      "access": "full",
+      "family_evidence": "Protocol/tool guidance, not a vehicle compatibility claim.",
+      "identity_evidence": "UDS measuring maps require a supported ROD and HEX-NET/HEX-V2; Raw Hex restoration requires prior adphex data.",
+      "notes": "",
+      "retrieved_at": "2026-10-24"
+    },
+    {
+      "id": "maps_src_ross_adaptation",
+      "url": "https://www.ross-tech.com/vcds/tour/adaptation_screen.php",
+      "title": "VCDS Tour - Adaptation",
+      "kind": "diagnostic_vendor_documentation",
+      "access": "full",
+      "family_evidence": "UDS/ODX/ASAM generally.",
+      "identity_evidence": "Named data objects are selected through a dropdown; traditional numbered channels do not apply.",
+      "notes": "",
+      "retrieved_at": "2026-10-24"
+    },
+    {
+      "id": "maps_src_a4_scan",
+      "url": "https://forums.ross-tech.com/index.php?threads/47309/",
+      "title": "Maps - 2018 AUDI A4 (8W) (B9), 1.4 TFSI, CVNA",
+      "kind": "original_forum_scan",
+      "access": "excerpt",
+      "family_evidence": "High-scale inferred from MU-HS and HGS2 label; no literal firmware train retrieved.",
+      "identity_evidence": "SW 8W0 035 192 H; HW 8W0 035 192 A; MU-HS-LND-EU 050 0213; EV_MUHigScl6C3DELP 001011.",
+      "notes": "The full 5F map remains a retrieval lead, not acquired channel evidence.  Public VIN and coding string intentionally omitted.",
+      "retrieved_at": "2026-10-24"
+    },
+    {
+      "id": "maps_src_q5_map_lead",
+      "url": "https://forums.ross-tech.com/index.php?threads/13706/",
+      "title": "Audi Q5 2018 support thread with 5F adaptation map",
+      "kind": "original_forum_map_lead",
+      "access": "excerpt",
+      "family_evidence": "High-scale inferred from EV_MUHigScl6C3DELP; no literal train in retrieved snippet.",
+      "identity_evidence": "Posted map identifies 8W0-035-192-C; full 5F map not acquired.",
+      "notes": "Only infotainment map metadata considered; unrelated driver-assistance modifications excluded.",
+      "retrieved_at": "2026-10-24"
+    },
+    {
+      "id": "mib-helper-p0470",
+      "url": "https://mib-helper.com/index.php?train=MHS2_ER_AU_P0470",
+      "title": "MIB Helper: MHS2_ER_AU_P0470",
+      "kind": "original_tool_output",
+      "access": "full",
+      "family_evidence": "Identifies MIB2 High Scale, Audi, Delphi, Europe/Rest of World.",
+      "identity_evidence": "P0470; page leaves MU version unknown.",
+      "retrieved_at": "2026-10-24",
+      "notes": "Family reference only; no update files or patch payloads bundled."
+    },
+    {
+      "id": "audi-asi-activation",
+      "url": "https://static.nhtsa.gov/odi/tsbs/2016/SB-10094048-0699.pdf",
+      "title": "Audi TSB 2042506/2: functions unavailable and activation keys",
+      "kind": "manufacturer_document",
+      "access": "full",
+      "family_evidence": "Includes A4 model years 2017–2018; not MHS2-only.",
+      "identity_evidence": "Bulletin date 2016-04-14; no target ECU fingerprint.",
+      "retrieved_at": "2026-10-24",
+      "notes": "Activation status and prerequisites only; no server, license or recovery action implemented."
+    },
+    {
+      "id": "audi-hs-sound",
+      "url": "https://static.nhtsa.gov/odi/tsbs/2019/MC-10155665-9999.pdf",
+      "title": "Audi TSB 2053537/1: MIB2 High Scale sound settings lost",
+      "kind": "manufacturer_document",
+      "access": "full",
+      "family_evidence": "MIB2 High Scale; A4 2017–2018 included.",
+      "identity_evidence": "Audi of America bulletin dated 2019-01-14.",
+      "retrieved_at": "2026-10-24",
+      "notes": "US update prescription is not a firmware recommendation for an EU target."
+    },
+    {
+      "id": "vwflash-coding-record",
+      "url": "https://github.com/bri3d/VW_Flash/blob/293f46d782bae2ced930497889b71eb782f122cb/lib/constants.py",
+      "title": "VW_Flash diagnostic record constants at pinned revision",
+      "kind": "original_project_source",
+      "access": "full",
+      "family_evidence": "Generic VAG record identifiers; no MHS2 feature map.",
+      "identity_evidence": "Pinned revision 293f46d782bae2ced930497889b71eb782f122cb.",
+      "retrieved_at": "2026-10-24",
+      "notes": "0x0600 coding-record label; this source establishes no candidate bit semantics."
+    }
+  ],
+  "entries": [
+    {
+      "id": "maps_amplifier_bap",
+      "name": "Amplifier BAP menu-availability observation",
+      "category": "Audio",
+      "kind": "adaptation",
+      "ecu": "5F",
+      "families": [
+        "generic_A4B9_MIB2"
+      ],
+      "platforms": [
+        "Audi A4 B9"
+      ],
+      "status": "documented",
+      "summary": "A published B9 configuration map contains an amplifier BAP flag.",
+      "locator": {
+        "channel": "ENG122229-ENG117764-Car_Function_List_BAP_Gen2-Amplifier_0x2D",
+        "did": null,
+        "byte": null,
+        "bit": null,
+        "mask": null
+      },
+      "reported_values": [
+        "not activated: source baseline"
+      ],
+      "prerequisites": [],
+      "limitations": [
+        "No evidence that changing it enables an absent amplifier or subwoofer control.",
+        "No readback or functional test on the target 8W0 035 193 G / MU0191 is available."
+      ],
+      "verification_questions": [
+        "Does the target ECU expose the same exact selector and enum in its own adaptation map?",
+        "Is the vehicle audio topology internal amplifier or external MOST?"
+      ],
+      "evidence": [
+        {
+          "source_id": "maps_src_audiworld_map",
+          "claim": "Observed baseline only.",
+          "locator_hint": "#475 BAP list"
+        }
+      ],
+      "writable": false,
+      "verified_on_target": false
+    },
+    {
+      "id": "maps_audio_signalflow",
+      "name": "Internal amplifier centre/sub routing candidate",
+      "category": "Audio",
+      "kind": "procedure",
+      "ecu": "5F",
+      "families": [
+        "MHS2"
+      ],
+      "platforms": [
+        "Audi A3 8V; initial report platform not fully identified"
+      ],
+      "status": "reported",
+      "summary": "An MHS2-labelled owner report changes the first field of an audio parameter area to enable centre/sub routing.",
+      "locator": {
+        "channel": null,
+        "did": null,
+        "byte": null,
+        "bit": null,
+        "mask": null
+      },
+      "reported_values": [
+        "Dataset area 0x003000",
+        "Signalflow: 30 (reported as 6-channel centre/sub configuration)"
+      ],
+      "prerequisites": [
+        "Matching physical speaker and amplifier configuration",
+        "Original dataset and independently checked schema"
+      ],
+      "limitations": [
+        "This is a dataset field, not a byte of 5F long coding.",
+        "The source does not establish whether its displayed 30 is decimal or hexadecimal.",
+        "Author qualifies the MHS2 identification; part and ASAM absent.",
+        "No readback or functional test on the target 8W0 035 193 G / MU0191 is available."
+      ],
+      "verification_questions": [
+        "What is the existing routing value and full dataset layout?",
+        "Does the factory equipment support these output channels?"
+      ],
+      "evidence": [
+        {
+          "source_id": "maps_src_audio_owner",
+          "claim": "Reported first-field routing change.",
+          "locator_hint": "#1"
+        }
+      ],
+      "writable": false,
+      "verified_on_target": false
+    },
+    {
+      "id": "maps_audio_individual_failure",
+      "name": "SOUND_SYSTEM_INTERNAL_INDIVIDUAL coding failure",
+      "category": "Audio",
+      "kind": "coding",
+      "ecu": "5F",
+      "families": [
+        "MHS2"
+      ],
+      "platforms": [
+        "Audi A3 8V"
+      ],
+      "status": "conflicting",
+      "summary": "The identified A3 MHS2 owner reports a coding fault from this sound-system selection before a different dataset approach succeeded.",
+      "locator": {
+        "channel": null,
+        "did": null,
+        "byte": null,
+        "bit": null,
+        "mask": null
+      },
+      "reported_values": [
+        "SOUND_SYSTEM_INTERNAL_INDIVIDUAL: reported coding error"
+      ],
+      "prerequisites": [],
+      "limitations": [
+        "No byte/bit or fault number is given.",
+        "Failure is evidence for this configuration, not proof all MHS2 units reject the selection.",
+        "No readback or functional test on the target 8W0 035 193 G / MU0191 is available."
+      ],
+      "verification_questions": [
+        "What exact selector, byte and fault appear on the target?"
+      ],
+      "evidence": [
+        {
+          "source_id": "maps_src_audio_a3",
+          "claim": "Named coding choice failed on 81A035192E MU0235.",
+          "locator_hint": "#1; resolution #3"
+        }
+      ],
+      "writable": false,
+      "verified_on_target": false
+    },
+    {
+      "id": "maps_subwoofer_dataset",
+      "name": "Separate subwoofer control from audio dataset",
+      "category": "Audio",
+      "kind": "procedure",
+      "ecu": "5F",
+      "families": [
+        "MHS2"
+      ],
+      "platforms": [
+        "Audi A4 B9",
+        "Audi A3 8V"
+      ],
+      "status": "reported",
+      "summary": "Owners report exposing a subwoofer control through audio parameter changes.",
+      "locator": {
+        "channel": null,
+        "did": null,
+        "byte": null,
+        "bit": null,
+        "mask": null
+      },
+      "reported_values": [
+        "Dataset area 0x003B00; reported subwoofer range -9, 0, 9",
+        "Related gain data in area 0x003000"
+      ],
+      "prerequisites": [
+        "Compatible internal-amplifier sound configuration",
+        "Original parameter backup and a validated schema"
+      ],
+      "limitations": [
+        "These addresses are dataset locations, not demonstrated UDS DIDs.",
+        "B9 report lacks exact part/SW; A3 report is a different part at MU0235.",
+        "No readback or functional test on the target 8W0 035 193 G / MU0191 is available."
+      ],
+      "verification_questions": [
+        "Does target MU0191 implement the same dataset schema and knob?",
+        "Is the car using the internal amplifier or an external MOST amplifier?"
+      ],
+      "evidence": [
+        {
+          "source_id": "maps_src_audio_owner",
+          "claim": "B9 MHS2 owner reports success.",
+          "locator_hint": "#1 and #20"
+        },
+        {
+          "source_id": "maps_src_audio_a3",
+          "claim": "Identified MHS2 A3 owner reports success after range/gain changes.",
+          "locator_hint": "#1 and #3"
+        },
+        {
+          "source_id": "maps_src_audio_research",
+          "claim": "Original research explicitly limits scope to internal amplification.",
+          "locator_hint": "Connection and Channel Routing"
+        }
+      ],
+      "writable": false,
+      "verified_on_target": false
+    },
+    {
+      "id": "mhs2-sound-source-persistence",
+      "name": "Sound settings and input-source persistence",
+      "category": "Audio",
+      "kind": "procedure",
+      "ecu": "5F",
+      "families": [
+        "MHS2"
+      ],
+      "platforms": [
+        "Audi A4 B9"
+      ],
+      "status": "documented",
+      "summary": "Audi distinguishes per-source sound settings from a High Scale software fault that loses them after sleep.",
+      "locator": {
+        "channel": null,
+        "did": null,
+        "byte": null,
+        "bit": null,
+        "mask": null
+      },
+      "reported_values": [],
+      "prerequisites": [],
+      "limitations": [
+        "Do not compare different media inputs as evidence that an adaptation failed.",
+        "The US bulletin update procedure is not an EU firmware recommendation."
+      ],
+      "verification_questions": [
+        "Do values persist on the same source after a sleep cycle, with the actual software version recorded?"
+      ],
+      "evidence": [
+        {
+          "source_id": "audi-hs-sound",
+          "claim": "Per-source settings and the separate persistence fault are documented.",
+          "locator_hint": "TSB 2053537/1, page 1"
+        }
+      ],
+      "writable": false,
+      "verified_on_target": false
+    },
+    {
+      "id": "mhs2-rvc-failsafe",
+      "name": "RVC low: failsafe flag",
+      "category": "Camera and parking",
+      "kind": "adaptation",
+      "ecu": "5F",
+      "families": [
+        "MHS2"
+      ],
+      "platforms": [
+        "MLB evo"
+      ],
+      "status": "reported",
+      "verified_on_target": false,
+      "writable": false,
+      "summary": "Observed named field and unchanged value in an identified Delphi A4 5F scan discussion; no recommendation to disable camera safeguards.",
+      "locator": {
+        "channel": "IDE03471-ENG245015-Vehicle configuration-rvc_low_failsafe",
+        "did": null,
+        "byte": null,
+        "bit": null,
+        "mask": null
+      },
+      "reported_values": [
+        "not activated (existing value)"
+      ],
+      "prerequisites": [
+        "Read-only identification and adaptation/coding export from the target unit."
+      ],
+      "limitations": [
+        "Channel semantics and any safety implications are not documented by this observation.",
+        "Not a necessary step or successful isolated test."
+      ],
+      "verification_questions": [
+        "Does this field exist on the target, and what does its authoritative diagnostic definition say it controls?"
+      ],
+      "evidence": [
+        {
+          "source_id": "aw-rvc",
+          "claim": "Owner confirms this was already not activated.",
+          "locator_hint": "posts 4–9"
+        }
+      ]
+    },
+    {
+      "id": "mhs2-rvc-trunk-blank",
+      "name": "RVC low: trunk-open blanking",
+      "category": "Camera and parking",
+      "kind": "adaptation",
+      "ecu": "5F",
+      "families": [
+        "MHS2"
+      ],
+      "platforms": [
+        "MLB evo"
+      ],
+      "status": "reported",
+      "verified_on_target": false,
+      "writable": false,
+      "summary": "Observed named field and unchanged value in an identified Delphi A4 5F scan discussion; no recommendation to disable camera safeguards.",
+      "locator": {
+        "channel": "IDE03471-ENG245031-Vehicle configuration-rvc_low_black_screen_trunk_open",
+        "did": null,
+        "byte": null,
+        "bit": null,
+        "mask": null
+      },
+      "reported_values": [
+        "not activated (existing value)"
+      ],
+      "prerequisites": [
+        "Read-only identification and adaptation/coding export from the target unit."
+      ],
+      "limitations": [
+        "Channel semantics and any safety implications are not documented by this observation.",
+        "Not a necessary step or successful isolated test."
+      ],
+      "verification_questions": [
+        "Does this field exist on the target, and what does its authoritative diagnostic definition say it controls?"
+      ],
+      "evidence": [
+        {
+          "source_id": "aw-rvc",
+          "claim": "Owner confirms this was already not activated.",
+          "locator_hint": "posts 4–9"
+        }
+      ]
+    },
+    {
+      "id": "mhs2-rvc-speed-blank",
+      "name": "RVC low: velocity blanking",
+      "category": "Camera and parking",
+      "kind": "adaptation",
+      "ecu": "5F",
+      "families": [
+        "MHS2"
+      ],
+      "platforms": [
+        "MLB evo"
+      ],
+      "status": "reported",
+      "verified_on_target": false,
+      "writable": false,
+      "summary": "Observed named field and unchanged value in an identified Delphi A4 5F scan discussion; no recommendation to disable camera safeguards.",
+      "locator": {
+        "channel": "IDE03471-ENG244966-Vehicle configuration-rvc_low_black_screen_velocity_threshold",
+        "did": null,
+        "byte": null,
+        "bit": null,
+        "mask": null
+      },
+      "reported_values": [
+        "not activated (existing value)"
+      ],
+      "prerequisites": [
+        "Read-only identification and adaptation/coding export from the target unit."
+      ],
+      "limitations": [
+        "Channel semantics and any safety implications are not documented by this observation.",
+        "Not a necessary step or successful isolated test."
+      ],
+      "verification_questions": [
+        "Does this field exist on the target, and what does its authoritative diagnostic definition say it controls?"
+      ],
+      "evidence": [
+        {
+          "source_id": "aw-rvc",
+          "claim": "Owner confirms this was already not activated.",
+          "locator_hint": "posts 4–9"
+        }
+      ]
+    },
+    {
+      "id": "mhs2-rvc-video-input",
+      "name": "Rear-view camera video input",
+      "category": "Camera and parking",
+      "kind": "adaptation",
+      "ecu": "5F",
+      "families": [
+        "MHS2"
+      ],
+      "platforms": [
+        "MLB evo"
+      ],
+      "status": "reported",
+      "verified_on_target": false,
+      "writable": false,
+      "summary": "Identified Delphi A4 5F owner confirms FBAS as an existing setting in a camera-retrofit discussion.",
+      "locator": {
+        "channel": "IDE03471-ENG126143-Vehicle configuration-RVC_video_input",
+        "did": null,
+        "byte": null,
+        "bit": null,
+        "mask": null
+      },
+      "reported_values": [
+        "FBAS (existing value)"
+      ],
+      "prerequisites": [
+        "Read-only identification and adaptation/coding export from the target unit."
+      ],
+      "limitations": [
+        "Observed default on MU-HS-S-US 0118; not proof that the user's MU-HS-LN-EU needs a change.",
+        "Final retrofit success followed a camera-controller change."
+      ],
+      "verification_questions": [
+        "Is the installed camera's signal path compatible, and what is the current target value?"
+      ],
+      "evidence": [
+        {
+          "source_id": "aw-rvc",
+          "claim": "Owner confirms RVC_video_input FBAS was already present.",
+          "locator_hint": "posts 4–9"
+        }
+      ]
+    },
+    {
+      "id": "mhs2-vps-bap",
+      "name": "VPS BAP function",
+      "category": "Camera and parking",
+      "kind": "adaptation",
+      "ecu": "5F",
+      "families": [
+        "MHS2"
+      ],
+      "platforms": [
+        "MLB evo"
+      ],
+      "status": "reported",
+      "verified_on_target": false,
+      "writable": false,
+      "summary": "A Delphi A4 camera-retrofit owner had set the VPS BAP function to activated.",
+      "locator": {
+        "channel": "ENG122229-ENG117712-Car_Function_List_BAP_Gen2-VPS_0x0B",
+        "did": null,
+        "byte": null,
+        "bit": null,
+        "mask": null
+      },
+      "reported_values": [
+        "activated (owner change)"
+      ],
+      "prerequisites": [
+        "Read-only identification and adaptation/coding export from the target unit."
+      ],
+      "limitations": [
+        "The function name's 0x0B is not treated as a raw DID or byte offset.",
+        "Camera topology and controller settings remain prerequisites; this alone did not resolve the retrofit."
+      ],
+      "verification_questions": [
+        "Does the target camera installation require this BAP function, and what is its current value?"
+      ],
+      "evidence": [
+        {
+          "source_id": "aw-rvc",
+          "claim": "Owner reports VPS_0x0B activated before final camera fix.",
+          "locator_hint": "posts 4–9"
+        }
+      ]
+    },
+    {
+      "id": "mhs2-vps-bus",
+      "name": "VPS BAP message bus",
+      "category": "Camera and parking",
+      "kind": "adaptation",
+      "ecu": "5F",
+      "families": [
+        "MHS2"
+      ],
+      "platforms": [
+        "MLB evo"
+      ],
+      "status": "reported",
+      "verified_on_target": false,
+      "writable": false,
+      "summary": "A Delphi A4 camera-retrofit owner reports Terminal 15 for the VPS message-bus field.",
+      "locator": {
+        "channel": "ENG122229-ENG117713-Car_Function_List_BAP_Gen2-VPS_0x0B_msg_bus",
+        "did": null,
+        "byte": null,
+        "bit": null,
+        "mask": null
+      },
+      "reported_values": [
+        "Terminal 15 (owner change)"
+      ],
+      "prerequisites": [
+        "Read-only identification and adaptation/coding export from the target unit."
+      ],
+      "limitations": [
+        "The label is reported verbatim as an enum; its electrical or bus meaning is not inferred.",
+        "This is one installation's setting, not a universal camera retrofit value."
+      ],
+      "verification_questions": [
+        "What enum does the target expose, and what is required by its actual camera topology?"
+      ],
+      "evidence": [
+        {
+          "source_id": "aw-rvc",
+          "claim": "Owner reports VPS_0x0B_msg_bus Terminal 15.",
+          "locator_hint": "posts 4–9"
+        }
+      ]
+    },
+    {
+      "id": "maps_internal_sim",
+      "name": "Internal versus external SIM selection",
+      "category": "Connectivity",
+      "kind": "adaptation",
+      "ecu": "5F",
+      "families": [
+        "generic_A4B9_MIB2"
+      ],
+      "platforms": [
+        "Audi A4 B9"
+      ],
+      "status": "reported",
+      "summary": "An original B9 owner reports expanded data-connection settings after changing SIM-use policy.",
+      "locator": {
+        "channel": "IDE10668-Internal SIM card: use",
+        "did": null,
+        "byte": null,
+        "bit": null,
+        "mask": null
+      },
+      "reported_values": [
+        "always -> automatic"
+      ],
+      "prerequisites": [
+        "Working external SIM slot/modem",
+        "Appropriate data subscription"
+      ],
+      "limitations": [
+        "The original UI uses a semicolon in the label; map uses a colon.",
+        "Historical report does not establish continued availability of online services.",
+        "No readback or functional test on the target 8W0 035 193 G / MU0191 is available."
+      ],
+      "verification_questions": [
+        "Does the target ECU expose the same exact selector and enum in its own adaptation map?",
+        "Does the exact target include the modem and external SIM interface?"
+      ],
+      "evidence": [
+        {
+          "source_id": "maps_src_audiworld_original",
+          "claim": "Owner reports APN controls and external-SIM data operation.",
+          "locator_hint": "#7"
+        },
+        {
+          "source_id": "maps_src_audiworld_simmap",
+          "claim": "Map supplies IDE10668 and automatic value.",
+          "locator_hint": "5F listing"
+        }
+      ],
+      "writable": false,
+      "verified_on_target": false
+    },
+    {
+      "id": "maps_lte_module",
+      "name": "LTE module configuration observation",
+      "category": "Connectivity",
+      "kind": "adaptation",
+      "ecu": "5F",
+      "families": [
+        "generic_A4B9_MIB2"
+      ],
+      "platforms": [
+        "Audi A4 B9"
+      ],
+      "status": "reported",
+      "summary": "Original owner observed LTE active in a US B9; enabling a Canadian modem was speculation.",
+      "locator": {
+        "channel": "Vehicle configuration-LTE_module",
+        "did": null,
+        "byte": null,
+        "bit": null,
+        "mask": null
+      },
+      "reported_values": [
+        "activated: observed US setting"
+      ],
+      "prerequisites": [
+        "Compatible modem, antennas and service support"
+      ],
+      "limitations": [
+        "Source does not establish that changing this entry activates absent hardware or service.",
+        "No readback or functional test on the target 8W0 035 193 G / MU0191 is available."
+      ],
+      "verification_questions": [
+        "Does the target ECU expose the same exact selector and enum in its own adaptation map?",
+        "What modem hardware and regional configuration are installed?"
+      ],
+      "evidence": [
+        {
+          "source_id": "maps_src_audiworld_original",
+          "claim": "US observation with an explicitly tentative Canadian suggestion.",
+          "locator_hint": "#1"
+        }
+      ],
+      "writable": false,
+      "verified_on_target": false
+    },
+    {
+      "id": "maps_second_phone",
+      "name": "Second Bluetooth phone support candidate",
+      "category": "Connectivity",
+      "kind": "adaptation",
+      "ecu": "5F",
+      "families": [
+        "generic_A4B9_MIB2"
+      ],
+      "platforms": [
+        "Audi A4 B9"
+      ],
+      "status": "reported",
+      "summary": "A B9/Q7 compilation lists a second-phone setting, and a separate B9 map shows it enabled.",
+      "locator": {
+        "channel": "IDE03471-ENG130247-Vehicle configuration-Support_second_phone",
+        "did": null,
+        "byte": null,
+        "bit": null,
+        "mask": null
+      },
+      "reported_values": [
+        "Active: compilation target",
+        "On: separate map value"
+      ],
+      "prerequisites": [
+        "Compatible Bluetooth implementation"
+      ],
+      "limitations": [
+        "These sources do not provide an exact MHS2 success report.",
+        "No readback or functional test on the target 8W0 035 193 G / MU0191 is available."
+      ],
+      "verification_questions": [
+        "Does the target ECU expose the same exact selector and enum in its own adaptation map?",
+        "Can two phones connect and make/receive calls as intended after readback?"
+      ],
+      "evidence": [
+        {
+          "source_id": "maps_src_audizine",
+          "claim": "Compilation proposes activation.",
+          "locator_hint": "#17"
+        },
+        {
+          "source_id": "maps_src_audiworld_map",
+          "claim": "Map shows On.",
+          "locator_hint": "#475"
+        }
+      ],
+      "writable": false,
+      "verified_on_target": false
+    },
+    {
+      "id": "mhs2-developer-mode",
+      "name": "Developer mode",
+      "category": "Diagnostics",
+      "kind": "adaptation",
+      "ecu": "5F",
+      "families": [
+        "MHS2"
+      ],
+      "platforms": [
+        "MLB evo"
+      ],
+      "status": "reported",
+      "verified_on_target": false,
+      "writable": false,
+      "summary": "Original MHS2 Q5 demonstrator describes enabling Developer mode in a development diagnostic session and restarting the MMI before using GEM.",
+      "locator": {
+        "channel": "Developer mode",
+        "did": null,
+        "byte": null,
+        "bit": null,
+        "mask": null
+      },
+      "reported_values": [
+        "activated"
+      ],
+      "prerequisites": [
+        "Read-only identification and adaptation/coding export from the target unit."
+      ],
+      "limitations": [
+        "Exact IDE identifier is absent; IDE02122 from adjacent MHI2 discussions is not imported.",
+        "This is a diagnostic-access candidate, not a target-tested permission/session sequence."
+      ],
+      "verification_questions": [
+        "Does the target expose Developer mode and require a specific supported diagnostic session?",
+        "Can the existing value and a documented restoration path be read before any authorized change?"
+      ],
+      "evidence": [
+        {
+          "source_id": "mrfix-gem",
+          "claim": "Creator's description identifies MHS2 and the Developer mode setting.",
+          "locator_hint": "original video description, 2021-11-30"
+        }
+      ]
+    },
+    {
+      "id": "maps_legacy_green_3g",
+      "name": "Legacy 3G numeric green-menu channel",
+      "category": "Diagnostics",
+      "kind": "adaptation",
+      "ecu": "5F",
+      "families": [
+        "MMI_3G",
+        "MMI_3G_PLUS"
+      ],
+      "platforms": [
+        "Legacy Audi platforms"
+      ],
+      "status": "out_of_scope",
+      "summary": "The numeric channel-6 recipe belongs to 3G/3G+.",
+      "locator": {
+        "channel": "Legacy numeric adaptation channel 6",
+        "did": null,
+        "byte": null,
+        "bit": null,
+        "mask": null
+      },
+      "reported_values": [
+        "0 -> 1"
+      ],
+      "prerequisites": [],
+      "limitations": [
+        "Do not substitute this numeric channel for an MHS2 named UDS adaptation."
+      ],
+      "verification_questions": [
+        "Confirm protocol generation before allowing numeric-channel recipes."
+      ],
+      "evidence": [
+        {
+          "source_id": "maps_src_legacy_3g",
+          "claim": "Tutorial explicitly limits this branch to 3G/3G+.",
+          "locator_hint": "3G and 3G+ section"
+        }
+      ],
+      "writable": false,
+      "verified_on_target": false
+    },
+    {
+      "id": "maps_legacy_green_rmc",
+      "name": "Legacy RMC numeric green-menu channel",
+      "category": "Diagnostics",
+      "kind": "adaptation",
+      "ecu": "5F",
+      "families": [
+        "RMC"
+      ],
+      "platforms": [
+        "Legacy Audi platforms"
+      ],
+      "status": "out_of_scope",
+      "summary": "The numeric channel-5 recipe belongs to RMC.",
+      "locator": {
+        "channel": "Legacy numeric adaptation channel 5",
+        "did": null,
+        "byte": null,
+        "bit": null,
+        "mask": null
+      },
+      "reported_values": [
+        "0 -> 1"
+      ],
+      "prerequisites": [],
+      "limitations": [
+        "Not an MHS2 channel mapping."
+      ],
+      "verification_questions": [
+        "Confirm unit family before exposing this recipe."
+      ],
+      "evidence": [
+        {
+          "source_id": "maps_src_legacy_rmc",
+          "claim": "RMC-specific tutorial branch.",
+          "locator_hint": "Activation section"
+        }
+      ],
+      "writable": false,
+      "verified_on_target": false
+    },
+    {
+      "id": "maps_green_menu",
+      "name": "MHS2 green engineering menu entry",
+      "category": "Diagnostics",
+      "kind": "procedure",
+      "ecu": "5F",
+      "families": [
+        "MHS2"
+      ],
+      "platforms": [
+        "Audi Q5 FY"
+      ],
+      "status": "reported",
+      "summary": "Reported button sequence opens the MHS2 engineering menu after developer mode is enabled.",
+      "locator": {
+        "channel": null,
+        "did": null,
+        "byte": null,
+        "bit": null,
+        "mask": null
+      },
+      "reported_values": [
+        "NAV/MAP and RADIO forward, approximately 3 seconds"
+      ],
+      "prerequisites": [
+        "Developer mode already enabled",
+        "Matching physical control panel"
+      ],
+      "limitations": [
+        "No readback or functional test on the target 8W0 035 193 G / MU0191 is available.",
+        "Engineering-menu access does not establish availability of a requested feature."
+      ],
+      "verification_questions": [
+        "Does this A4 control-panel variant use the same sequence?"
+      ],
+      "evidence": [
+        {
+          "source_id": "mrfix-gem",
+          "claim": "Q5 FY MHS2 demonstration of menu entry.",
+          "locator_hint": "1:08"
+        }
+      ],
+      "writable": false,
+      "verified_on_target": false
+    },
+    {
+      "id": "mhs2-dashboard-record",
+      "name": "Dashboard display group: reported RDID",
+      "category": "Display",
+      "kind": "adaptation",
+      "ecu": "5F",
+      "families": [
+        "MHS2"
+      ],
+      "platforms": [
+        "Audi A4 B9"
+      ],
+      "status": "reported",
+      "summary": "An A4 owner explicitly labels the dashboard-display adaptation group with RDID 0B5A.",
+      "locator": {
+        "channel": "Dashboard_Display_Configuration",
+        "did": "0B5A",
+        "byte": null,
+        "bit": null,
+        "mask": null
+      },
+      "reported_values": [],
+      "prerequisites": [],
+      "limitations": [
+        "This is a source-stated group address, not a target-verified adaptation codec.",
+        "It is not added to automatic captures or the executable dictionary."
+      ],
+      "verification_questions": [
+        "Does the target definition and an explicitly reviewed read confirm group 0B5A and its exact layout?"
+      ],
+      "evidence": [
+        {
+          "source_id": "a4k-fis",
+          "claim": "Group RDID is written explicitly; individual field offsets and codecs are absent.",
+          "locator_hint": "Jari1234567, 2024-02-21, Dashboard_Display_Configuration"
+        }
+      ],
+      "writable": false,
+      "verified_on_target": false
+    },
+    {
+      "id": "mhs2-fis-compression",
+      "name": "Instrument-display map compression",
+      "category": "Display",
+      "kind": "adaptation",
+      "ecu": "5F",
+      "families": [
+        "MHS2"
+      ],
+      "platforms": [
+        "MLB evo"
+      ],
+      "status": "reported",
+      "verified_on_target": false,
+      "writable": false,
+      "summary": "Reported field in Dashboard_Display_Configuration for sending navigation imagery to the small color instrument display.",
+      "locator": {
+        "channel": "Dashboard_Display_Configuration-navigation_map_compression_mode",
+        "did": null,
+        "byte": null,
+        "bit": null,
+        "mask": null
+      },
+      "reported_values": [
+        "H264"
+      ],
+      "prerequisites": [
+        "Compatible small color instrument display and navigation equipment; A4 success report specifies MuFuPlus steering-wheel controls.",
+        "Exact target display configuration and diagnostic field definitions must be established."
+      ],
+      "limitations": [
+        "Source explicitly reports group RDID $0B5A, but no raw layout or codec; locator.did stays null pending validation.",
+        "A5 P2035 owner using the same settings reports compass only; the intended simultaneous-navigation behavior is not guaranteed.",
+        "These reports do not establish Virtual Cockpit map support.",
+        "Prior target context describes a monochrome PR 9S5 cluster; the color-display recipe is not established for it."
+      ],
+      "verification_questions": [
+        "Does the target expose this field and enum, and does its authoritative definition map the group to RDID 0x0B5A?",
+        "Which instrument cluster and display path are actually installed?"
+      ],
+      "evidence": [
+        {
+          "source_id": "a4k-fis",
+          "claim": "navigation_map_compression_mode is reported as H264.",
+          "locator_hint": "Jari1234567, 2024-02-21",
+          "reported_did": "0x0B5A",
+          "reported_group": "[VO]_Dashboard_Display_Configuration"
+        },
+        {
+          "source_id": "aw-dualnav",
+          "claim": "Same configuration appears in an unsuccessful A5 small-cluster report.",
+          "locator_hint": "#33"
+        }
+      ]
+    },
+    {
+      "id": "mhs2-fis-resolution",
+      "name": "Instrument-display map resolution",
+      "category": "Display",
+      "kind": "adaptation",
+      "ecu": "5F",
+      "families": [
+        "MHS2"
+      ],
+      "platforms": [
+        "MLB evo"
+      ],
+      "status": "reported",
+      "verified_on_target": false,
+      "writable": false,
+      "summary": "Reported field in Dashboard_Display_Configuration for sending navigation imagery to the small color instrument display.",
+      "locator": {
+        "channel": "Dashboard_Display_Configuration-navigation_map_Resolution",
+        "did": null,
+        "byte": null,
+        "bit": null,
+        "mask": null
+      },
+      "reported_values": [
+        "resolution_1"
+      ],
+      "prerequisites": [
+        "Compatible small color instrument display and navigation equipment; A4 success report specifies MuFuPlus steering-wheel controls.",
+        "Exact target display configuration and diagnostic field definitions must be established."
+      ],
+      "limitations": [
+        "Source explicitly reports group RDID $0B5A, but no raw layout or codec; locator.did stays null pending validation.",
+        "A5 P2035 owner using the same settings reports compass only; the intended simultaneous-navigation behavior is not guaranteed.",
+        "These reports do not establish Virtual Cockpit map support.",
+        "Prior target context describes a monochrome PR 9S5 cluster; the color-display recipe is not established for it."
+      ],
+      "verification_questions": [
+        "Does the target expose this field and enum, and does its authoritative definition map the group to RDID 0x0B5A?",
+        "Which instrument cluster and display path are actually installed?"
+      ],
+      "evidence": [
+        {
+          "source_id": "a4k-fis",
+          "claim": "navigation_map_Resolution is reported as resolution_1.",
+          "locator_hint": "Jari1234567, 2024-02-21",
+          "reported_did": "0x0B5A",
+          "reported_group": "[VO]_Dashboard_Display_Configuration"
+        },
+        {
+          "source_id": "aw-dualnav",
+          "claim": "Same configuration appears in an unsuccessful A5 small-cluster report.",
+          "locator_hint": "#33"
+        }
+      ]
+    },
+    {
+      "id": "mhs2-fis-transmission",
+      "name": "Instrument-display map transmission",
+      "category": "Display",
+      "kind": "adaptation",
+      "ecu": "5F",
+      "families": [
+        "MHS2"
+      ],
+      "platforms": [
+        "MLB evo"
+      ],
+      "status": "reported",
+      "verified_on_target": false,
+      "writable": false,
+      "summary": "Reported field in Dashboard_Display_Configuration for sending navigation imagery to the small color instrument display.",
+      "locator": {
+        "channel": "Dashboard_Display_Configuration-navigation_map_transmission_mode",
+        "did": null,
+        "byte": null,
+        "bit": null,
+        "mask": null
+      },
+      "reported_values": [
+        "MOST_Streaming"
+      ],
+      "prerequisites": [
+        "Compatible small color instrument display and navigation equipment; A4 success report specifies MuFuPlus steering-wheel controls.",
+        "Exact target display configuration and diagnostic field definitions must be established."
+      ],
+      "limitations": [
+        "Source explicitly reports group RDID $0B5A, but no raw layout or codec; locator.did stays null pending validation.",
+        "A5 P2035 owner using the same settings reports compass only; the intended simultaneous-navigation behavior is not guaranteed.",
+        "These reports do not establish Virtual Cockpit map support.",
+        "Prior target context describes a monochrome PR 9S5 cluster; the color-display recipe is not established for it."
+      ],
+      "verification_questions": [
+        "Does the target expose this field and enum, and does its authoritative definition map the group to RDID 0x0B5A?",
+        "Which instrument cluster and display path are actually installed?"
+      ],
+      "evidence": [
+        {
+          "source_id": "a4k-fis",
+          "claim": "navigation_map_transmission_mode is reported as MOST_Streaming.",
+          "locator_hint": "Jari1234567, 2024-02-21",
+          "reported_did": "0x0B5A",
+          "reported_group": "[VO]_Dashboard_Display_Configuration"
+        },
+        {
+          "source_id": "aw-dualnav",
+          "claim": "Same configuration appears in an unsuccessful A5 small-cluster report.",
+          "locator_hint": "#33"
+        }
+      ]
+    },
+    {
+      "id": "maps_q7_splash_recipe",
+      "name": "SQ7 startup-screen recipe quarantined",
+      "category": "Display",
+      "kind": "coding",
+      "ecu": "5F",
+      "families": [
+        "generic_B9_Q7_MIB2"
+      ],
+      "platforms": [
+        "Audi Q7 4M"
+      ],
+      "status": "out_of_scope",
+      "summary": "A mixed-platform compilation gives an SQ7 screen-value change; it is not an A4 MHS2 mapping.",
+      "locator": {
+        "channel": null,
+        "did": null,
+        "byte": 18,
+        "bit": null,
+        "mask": null
+      },
+      "reported_values": [
+        "byte_18_Screenings: 27 -> 28; number base unspecified"
+      ],
+      "prerequisites": [],
+      "limitations": [
+        "No target hardware identity or logo enumeration.",
+        "No readback or functional test on the target 8W0 035 193 G / MU0191 is available."
+      ],
+      "verification_questions": [
+        "Obtain the correct target-specific vehicle/logo enumeration before presenting this as an option."
+      ],
+      "evidence": [
+        {
+          "source_id": "maps_src_audizine",
+          "claim": "SQ7-specific startup-screen claim.",
+          "locator_hint": "#17 near end"
+        }
+      ],
+      "writable": false,
+      "verified_on_target": false
+    },
+    {
+      "id": "mhs2-startup-graphic",
+      "name": "Startup graphic selection",
+      "category": "Display",
+      "kind": "coding",
+      "ecu": "5F",
+      "families": [
+        "MHS2"
+      ],
+      "platforms": [
+        "MLB evo",
+        "MQB (cross-platform comparison only)"
+      ],
+      "status": "conflicting",
+      "verified_on_target": false,
+      "writable": false,
+      "summary": "MHS2 discussions associate byte 18 with the startup graphic, but the A3 examples contain byte-position and numeric-representation inconsistencies.",
+      "locator": {
+        "channel": null,
+        "did": "0600",
+        "byte": 18,
+        "bit": null,
+        "mask": null
+      },
+      "reported_values": [
+        "01 → A4 (A3 conversion report)",
+        "32 → A3 quattro (as written)",
+        "50 → A3 quattro (separate resource table, not assumed coding value)"
+      ],
+      "prerequisites": [
+        "Read-only identification and adaptation/coding export from the target unit."
+      ],
+      "limitations": [
+        "A3 graphic identifiers are not a validated A4 table.",
+        "No conversion between decimal resource IDs and hexadecimal coding bytes is inferred.",
+        "0600 enables offline raw comparison only; exact target field semantics remain unverified."
+      ],
+      "verification_questions": [
+        "Does the target's diagnostic coding label identify a graphic field at the same byte?",
+        "What dataset and software-specific graphic resource table applies?"
+      ],
+      "evidence": [
+        {
+          "source_id": "a4k-us-eu",
+          "claim": "Contributor identifies byte 18 for the startup graphic.",
+          "locator_hint": "Muskel1 reply"
+        },
+        {
+          "source_id": "a4k-logo1",
+          "claim": "Owner's values and a resource table differ in representation; one described byte position does not match the posted string.",
+          "locator_hint": "March 2026 posts"
+        },
+        {
+          "source_id": "vwflash-coding-record",
+          "claim": "Generic VAG coding-record address only; the forum supplies the candidate offset.",
+          "locator_hint": "data_records: 0x0600"
+        }
+      ]
+    },
+    {
+      "id": "mhs2-193g-identity",
+      "name": "193 G / MU0191 public identity reference",
+      "category": "Identification",
+      "kind": "procedure",
+      "ecu": "5F",
+      "families": [
+        "MHS2"
+      ],
+      "platforms": [
+        "Audi A4 B9"
+      ],
+      "status": "documented",
+      "summary": "A public 5F scan associates this software part and version with the Delphi high-scale ASAM.",
+      "locator": {
+        "channel": null,
+        "did": null,
+        "byte": null,
+        "bit": null,
+        "mask": null
+      },
+      "reported_values": [
+        "SW 8W0 035 193 G; HW 8W0 035 193 A",
+        "MU-HS-LN-EU 045 0191",
+        "EV_MUHigScl6C3DELP 001011; dataset 8W0909545AA 0039"
+      ],
+      "prerequisites": [],
+      "limitations": [
+        "Separate owners and records must not be fused into one complete ECU definition.",
+        "No VIN, serial or complete coding string is reproduced."
+      ],
+      "verification_questions": [
+        "Confirm the exact current identity and relevant hardware."
+      ],
+      "evidence": [
+        {
+          "source_id": "a4k-193g-scan",
+          "claim": "Public 5F identity association; no adaptation definitions.",
+          "locator_hint": "robson760 scan, December 2023, Address 5F"
+        },
+        {
+          "source_id": "deb-p0470",
+          "claim": "A different owner reports P0470/MU0191; no joint map is established.",
+          "locator_hint": "fafki, post 6"
+        }
+      ],
+      "writable": false,
+      "verified_on_target": false
+    },
+    {
+      "id": "maps_highscale_identity",
+      "name": "High-scale scan fingerprint reference",
+      "category": "Identification",
+      "kind": "procedure",
+      "ecu": "5F",
+      "families": [
+        "MHS2_inferred_from_scan"
+      ],
+      "platforms": [
+        "Audi A4 B9"
+      ],
+      "status": "documented",
+      "summary": "A published B9 scan identifies the high-scale Delphi ASAM and MU-HS component family.",
+      "locator": {
+        "channel": null,
+        "did": null,
+        "byte": null,
+        "bit": null,
+        "mask": null
+      },
+      "reported_values": [
+        "EV_MUHigScl6C3DELP 001011",
+        "MU-HS-LND-EU 050 0213",
+        "SW 8W0 035 192 H; HW 8W0 035 192 A"
+      ],
+      "prerequisites": [],
+      "limitations": [
+        "No literal MHS2 train in the retrieved scan extract.",
+        "This is a different unit/firmware from the target and is not a coding template."
+      ],
+      "verification_questions": [
+        "Match part, hardware, software train and ASAM independently.",
+        "Retrieve the source map without inferring missing channel contents."
+      ],
+      "evidence": [
+        {
+          "source_id": "maps_src_a4_scan",
+          "claim": "High-scale fingerprint in a B9 scan.",
+          "locator_hint": "Address 5F"
+        },
+        {
+          "source_id": "maps_src_q5_map_lead",
+          "claim": "Additional high-scale map source exists but full contents remain unacquired.",
+          "locator_hint": "Posted 5F map heading"
+        }
+      ],
+      "writable": false,
+      "verified_on_target": false
+    },
+    {
+      "id": "maps_red_menu_inventory",
+      "name": "MHS2 red menu identity and license inventory",
+      "category": "Identification",
+      "kind": "procedure",
+      "ecu": "5F",
+      "families": [
+        "MHS2"
+      ],
+      "platforms": [
+        "Audi Q5 FY"
+      ],
+      "status": "reported",
+      "summary": "The red engineering menu exposes software-train information and installed feature-code inventory.",
+      "locator": {
+        "channel": null,
+        "did": null,
+        "byte": null,
+        "bit": null,
+        "mask": null
+      },
+      "reported_values": [
+        "NAV/MAP forward plus MEDIA pull, approximately 3 seconds"
+      ],
+      "prerequisites": [
+        "Matching physical control panel"
+      ],
+      "limitations": [
+        "Read-only inspection candidate; no update or activation is authorized by this record.",
+        "No readback or functional test on the target 8W0 035 193 G / MU0191 is available."
+      ],
+      "verification_questions": [
+        "Can complete train and existing feature status be captured without changing settings?"
+      ],
+      "evidence": [
+        {
+          "source_id": "maps_src_red",
+          "claim": "MHS2-specific identity/inventory menu demonstration.",
+          "locator_hint": "Description; 0:10 and 0:41"
+        }
+      ],
+      "writable": false,
+      "verified_on_target": false
+    },
+    {
+      "id": "mhs2-family-reference",
+      "name": "P0470 family and supplier reference",
+      "category": "Identification",
+      "kind": "procedure",
+      "ecu": "5F",
+      "families": [
+        "MHS2"
+      ],
+      "platforms": [
+        "Audi A4 B9"
+      ],
+      "status": "documented",
+      "summary": "The maintainer tool identifies P0470 as Delphi MIB2 High Scale.",
+      "locator": {
+        "channel": null,
+        "did": null,
+        "byte": null,
+        "bit": null,
+        "mask": null
+      },
+      "reported_values": [
+        "MHS2_ER_AU_P0470",
+        "Audi; Europe and Rest of World; Delphi"
+      ],
+      "prerequisites": [],
+      "limitations": [
+        "MIB Helper does not supply the P0470 MU number on this page.",
+        "A family name does not prove channel support, region conversion or update suitability."
+      ],
+      "verification_questions": [
+        "Confirm the exact current identity and relevant hardware."
+      ],
+      "evidence": [
+        {
+          "source_id": "mib-helper-p0470",
+          "claim": "Family and supplier classification.",
+          "locator_hint": "Firmware details"
+        },
+        {
+          "source_id": "audi-tsb-hs",
+          "claim": "Manufacturer distinguishes High Scale from Standard in its US bulletin.",
+          "locator_hint": "TSB 2050565/2 technical background"
+        }
+      ],
+      "writable": false,
+      "verified_on_target": false
+    },
+    {
+      "id": "mhs2-language-dataset",
+      "name": "Language parameterization dependency",
+      "category": "Language and region",
+      "kind": "procedure",
+      "ecu": "5F",
+      "families": [
+        "MHS2"
+      ],
+      "platforms": [
+        "MLB evo"
+      ],
+      "status": "out_of_scope",
+      "verified_on_target": false,
+      "writable": false,
+      "summary": "A converted MHS2 A4 owner refers to language datasets after software changes. This is parameterization evidence, not a normal adaptation recipe.",
+      "locator": {
+        "channel": null,
+        "did": null,
+        "byte": null,
+        "bit": null,
+        "mask": null
+      },
+      "reported_values": [
+        "DATA_Visible_MMI_Languages_EU (reported dataset name)",
+        "DATA_LanguageSettings_plPL (reported dataset name)"
+      ],
+      "prerequisites": [
+        "Read-only identification and adaptation/coding export from the target unit."
+      ],
+      "limitations": [
+        "The reported source container was A6-named; compatibility with an A4 or the target unit is not established.",
+        "No dataset contents, flashing instructions, activation payloads or cross-vehicle loading procedure are included."
+      ],
+      "verification_questions": [
+        "Is the desired language already supported by the target's current software and correctly matched dataset?",
+        "What manufacturer-supported parameterization applies to the exact part and equipment?"
+      ],
+      "evidence": [
+        {
+          "source_id": "a4k-us-eu",
+          "claim": "Owner names these language datasets in conversion follow-up.",
+          "locator_hint": "mrowa06, July 2025"
+        }
+      ]
+    },
+    {
+      "id": "mhs2-navigation-presence",
+      "name": "Navigation presence flag",
+      "category": "Navigation and region",
+      "kind": "coding",
+      "ecu": "5F",
+      "families": [
+        "MHS2"
+      ],
+      "platforms": [
+        "MLB evo"
+      ],
+      "status": "reported",
+      "verified_on_target": false,
+      "writable": false,
+      "summary": "An A4 B9 owner reports enabling byte 24 bit 2 during a US-to-Europe MHS2 conversion; navigation was not immediately functional.",
+      "locator": {
+        "channel": null,
+        "did": "0600",
+        "byte": 24,
+        "bit": 2,
+        "mask": null
+      },
+      "reported_values": [
+        "enabled"
+      ],
+      "prerequisites": [
+        "Read-only identification and adaptation/coding export from the target unit."
+      ],
+      "limitations": [
+        "A conversion report with concurrent changes does not isolate this bit's behavior.",
+        "Navigation requires compatible software, data and entitlement; the bit is not a complete conversion or activation.",
+        "0600 enables offline raw comparison only; exact target field semantics remain unverified."
+      ],
+      "verification_questions": [
+        "Does the target label file identify byte 24 bit 2 as navigation, with the same coding length and variant?"
+      ],
+      "evidence": [
+        {
+          "source_id": "a4k-us-eu",
+          "claim": "Owner associates navigation with byte 24 bit 2; navigation initially stalled at 11%.",
+          "locator_hint": "mrowa06, July 2025"
+        },
+        {
+          "source_id": "vwflash-coding-record",
+          "claim": "Generic VAG coding-record address only; the forum supplies the candidate offset.",
+          "locator_hint": "data_records: 0x0600"
+        }
+      ]
+    },
+    {
+      "id": "mhs2-navigation-region",
+      "name": "Navigation region coding",
+      "category": "Navigation and region",
+      "kind": "coding",
+      "ecu": "5F",
+      "families": [
+        "MHS2"
+      ],
+      "platforms": [
+        "MLB evo"
+      ],
+      "status": "reported",
+      "verified_on_target": false,
+      "writable": false,
+      "summary": "An owner reports byte 3 value 01 for Europe navigation during conversion.",
+      "locator": {
+        "channel": null,
+        "did": "0600",
+        "byte": 3,
+        "bit": null,
+        "mask": null
+      },
+      "reported_values": [
+        "01 (Europe, as written; base unspecified)"
+      ],
+      "prerequisites": [
+        "Read-only identification and adaptation/coding export from the target unit."
+      ],
+      "limitations": [
+        "The source does not establish a universal region enum or numeric base.",
+        "Target is already reported as an EU unit; this is a research candidate, not a requested change.",
+        "0600 enables offline raw comparison only; exact target field semantics remain unverified."
+      ],
+      "verification_questions": [
+        "What is byte 3's named field, width, allowed enum and current target value?"
+      ],
+      "evidence": [
+        {
+          "source_id": "a4k-us-eu",
+          "claim": "Owner reports byte 3 EU value 01.",
+          "locator_hint": "mrowa06, July 2025"
+        },
+        {
+          "source_id": "vwflash-coding-record",
+          "claim": "Generic VAG coding-record address only; the forum supplies the candidate offset.",
+          "locator_hint": "data_records: 0x0600"
+        }
+      ]
+    },
+    {
+      "id": "mhs2-radio-region",
+      "name": "Radio region coding",
+      "category": "Navigation and region",
+      "kind": "coding",
+      "ecu": "5F",
+      "families": [
+        "MHS2"
+      ],
+      "platforms": [
+        "MLB evo"
+      ],
+      "status": "reported",
+      "verified_on_target": false,
+      "writable": false,
+      "summary": "An owner reports byte 9 value 11 for Europe radio during conversion.",
+      "locator": {
+        "channel": null,
+        "did": "0600",
+        "byte": 9,
+        "bit": null,
+        "mask": null
+      },
+      "reported_values": [
+        "11 (Europe, as written; base unspecified)"
+      ],
+      "prerequisites": [
+        "Read-only identification and adaptation/coding export from the target unit."
+      ],
+      "limitations": [
+        "No universal radio-region table or base is established.",
+        "A regional setting cannot be assumed to replace compatible tuner hardware or dataset.",
+        "0600 enables offline raw comparison only; exact target field semantics remain unverified."
+      ],
+      "verification_questions": [
+        "Does the target identify byte 9 as a region field, and what is its exact enum representation?"
+      ],
+      "evidence": [
+        {
+          "source_id": "a4k-us-eu",
+          "claim": "Owner reports byte 9 EU value 11.",
+          "locator_hint": "mrowa06, July 2025"
+        },
+        {
+          "source_id": "vwflash-coding-record",
+          "claim": "Generic VAG coding-record address only; the forum supplies the candidate offset.",
+          "locator_hint": "data_records: 0x0600"
+        }
+      ]
+    },
+    {
+      "id": "maps_jukebox_coding",
+      "name": "Jukebox optical-copy coding candidate",
+      "category": "Radio and media",
+      "kind": "coding",
+      "ecu": "5F",
+      "families": [
+        "generic_A4B9_MIB2"
+      ],
+      "platforms": [
+        "Audi A4 B9",
+        "Audi Q7 4M"
+      ],
+      "status": "reported",
+      "summary": "Compilation associates optical-disc copying with a 5F coding bit and a separate adaptation.",
+      "locator": {
+        "channel": null,
+        "did": null,
+        "byte": 24,
+        "bit": 5,
+        "mask": null
+      },
+      "reported_values": [
+        "bit enabled"
+      ],
+      "prerequisites": [
+        "Optical drive and supported internal media storage"
+      ],
+      "limitations": [
+        "No exact MHS2 identification or demonstrated bitfield readback.",
+        "No readback or functional test on the target 8W0 035 193 G / MU0191 is available."
+      ],
+      "verification_questions": [
+        "Does the target coding label actually describe optical copying at this position?"
+      ],
+      "evidence": [
+        {
+          "source_id": "maps_src_audizine",
+          "claim": "Compiled Jukebox recipe states byte 24 bit 5.",
+          "locator_hint": "#17, Jukebox section"
+        }
+      ],
+      "writable": false,
+      "verified_on_target": false
+    },
+    {
+      "id": "maps_jukebox_adaptation",
+      "name": "Optical-drive multimedia copying candidate",
+      "category": "Radio and media",
+      "kind": "adaptation",
+      "ecu": "5F",
+      "families": [
+        "generic_A4B9_MIB2"
+      ],
+      "platforms": [
+        "Audi A4 B9",
+        "Audi Q7 4M"
+      ],
+      "status": "reported",
+      "summary": "The accompanying compilation names an optical-drive copy adaptation.",
+      "locator": {
+        "channel": "(2)-Copy multimedia data-Optical drive",
+        "did": null,
+        "byte": null,
+        "bit": null,
+        "mask": null
+      },
+      "reported_values": [
+        "Off -> On"
+      ],
+      "prerequisites": [
+        "Supported internal media storage and optical drive"
+      ],
+      "limitations": [
+        "The leading (2) is a UI index, not a UDS DID.",
+        "No readback or functional test on the target 8W0 035 193 G / MU0191 is available."
+      ],
+      "verification_questions": [
+        "Does the target ECU expose the same exact selector and enum in its own adaptation map?",
+        "Does the target provide Jukebox storage?"
+      ],
+      "evidence": [
+        {
+          "source_id": "maps_src_audizine",
+          "claim": "Companion adaptation to the listed coding bit.",
+          "locator_hint": "#17, Jukebox section"
+        }
+      ],
+      "writable": false,
+      "verified_on_target": false
+    },
+    {
+      "id": "mhs2-station-logo-mode",
+      "name": "Station logo database mode",
+      "category": "Radio and media",
+      "kind": "adaptation",
+      "ecu": "5F",
+      "families": [
+        "MHS2"
+      ],
+      "platforms": [
+        "MQB (A3 8V only; A4 transfer unverified)"
+      ],
+      "status": "reported",
+      "verified_on_target": false,
+      "writable": false,
+      "summary": "An MHS2 A3 conversion owner accepted 0→1 and obtained logo-related menu options, but station logos remained absent.",
+      "locator": {
+        "channel": "IDE03471-ENG126993-Vehicle configuration-Station_Logo_DB_Mode",
+        "did": null,
+        "byte": null,
+        "bit": null,
+        "mask": null
+      },
+      "reported_values": [
+        "0 → 1 (accepted; menu appeared, logos absent)"
+      ],
+      "prerequisites": [
+        "Read-only identification and adaptation/coding export from the target unit."
+      ],
+      "limitations": [
+        "This evidence is MHS2-family specific but not MLB evo specific.",
+        "The menu flag does not establish availability of the logo database or compatible regional assets.",
+        "Linked CSV was inaccessible and is not treated as a read adaptation map."
+      ],
+      "verification_questions": [
+        "Does the target expose this exact channel, and which database/assets does it expect?"
+      ],
+      "evidence": [
+        {
+          "source_id": "a4k-logo3",
+          "claim": "Named channel suggested, owner confirms accepted value and incomplete visual result.",
+          "locator_hint": "July 2026 posts"
+        }
+      ]
+    },
+    {
+      "id": "mhs2-apple-dio",
+      "name": "Apple_DIO",
+      "category": "Smartphone interface",
+      "kind": "adaptation",
+      "ecu": "5F",
+      "families": [
+        "MHS2"
+      ],
+      "platforms": [
+        "MLB evo"
+      ],
+      "status": "reported",
+      "verified_on_target": false,
+      "writable": false,
+      "summary": "Named Apple interface setting appears in Delphi MHS2 owner reports. Enabling it was part of both successful and unsuccessful multi-step retrofits.",
+      "locator": {
+        "channel": "Vehicle configuration-Apple_DIO",
+        "did": null,
+        "byte": null,
+        "bit": null,
+        "mask": null
+      },
+      "reported_values": [
+        "ON"
+      ],
+      "prerequisites": [
+        "Compatible USB data socket and wiring; power or USB audio alone does not prove smartphone-interface compatibility.",
+        "Required feature entitlement and compatible head-unit software; coding is not evidence of license activation."
+      ],
+      "limitations": [
+        "The diagnostic prefix is printed DE03471-ENG130249 in one post; this research does not silently correct it to an exact IDE identifier.",
+        "No raw DID, payload layout or target P0470 support proven."
+      ],
+      "verification_questions": [
+        "Does the target export contain Apple_DIO, and what is its exact parent group, identifier and enum?",
+        "Does the unit already have the required entitlement and USB data hardware?"
+      ],
+      "evidence": [
+        {
+          "source_id": "deb-si52",
+          "claim": "Owner copied Apple_DIO ON from the Delphi guide; CarPlay still failed.",
+          "locator_hint": "#780"
+        },
+        {
+          "source_id": "deb-talk62",
+          "claim": "Apple_DIO appears with a malformed diagnostic prefix.",
+          "locator_hint": "#916"
+        },
+        {
+          "source_id": "aw-usb20",
+          "claim": "Owner includes AppleDIO in a completed P2035 USB retrofit.",
+          "locator_hint": "#194"
+        }
+      ]
+    },
+    {
+      "id": "mhs2-google-gal",
+      "name": "Google_GAL",
+      "category": "Smartphone interface",
+      "kind": "adaptation",
+      "ecu": "5F",
+      "families": [
+        "MHS2"
+      ],
+      "platforms": [
+        "MLB evo"
+      ],
+      "status": "reported",
+      "verified_on_target": false,
+      "writable": false,
+      "summary": "Named Google interface setting is reported for Delphi MHS2; one source gives the diagnostic channel identifier.",
+      "locator": {
+        "channel": "IDE03471-ENG130248-Vehicle configuration-Google_GAL",
+        "did": null,
+        "byte": null,
+        "bit": null,
+        "mask": null
+      },
+      "reported_values": [
+        "ON"
+      ],
+      "prerequisites": [
+        "Compatible USB data socket and wiring; power or USB audio alone does not prove smartphone-interface compatibility.",
+        "Required feature entitlement and compatible head-unit software; coding is not evidence of license activation."
+      ],
+      "limitations": [
+        "A displayed smartphone-interface icon does not establish Android Auto operation.",
+        "IDE/ENG numbers are channel labels, not inferred UDS DIDs."
+      ],
+      "verification_questions": [
+        "Does the same identifier and enum exist on MU0191/P0470?",
+        "Can feature entitlement and a functioning USB data path be confirmed separately?"
+      ],
+      "evidence": [
+        {
+          "source_id": "deb-talk62",
+          "claim": "Owner lists this complete Google_GAL label, with no working Android Auto result.",
+          "locator_hint": "#916"
+        },
+        {
+          "source_id": "aw-usb20",
+          "claim": "GoogleGAL was included in a successful P2035 retrofit with hardware and feature prerequisites.",
+          "locator_hint": "#194"
+        }
+      ]
+    },
+    {
+      "id": "mhs2-asi-entitlement",
+      "name": "Smartphone-interface activation prerequisite",
+      "category": "Smartphone interface",
+      "kind": "procedure",
+      "ecu": "5F",
+      "families": [
+        "MHS2"
+      ],
+      "platforms": [
+        "Audi A4 B9"
+      ],
+      "status": "documented",
+      "summary": "Audi documents activation-key dependence for smartphone interface and other licensed functions.",
+      "locator": {
+        "channel": null,
+        "did": null,
+        "byte": null,
+        "bit": null,
+        "mask": null
+      },
+      "reported_values": [],
+      "prerequisites": [],
+      "limitations": [
+        "The bulletin is not an exact MHS2 channel/codec map.",
+        "No entitlement is created or modified by the application."
+      ],
+      "verification_questions": [
+        "What activation state does the original unit report, and does it match the installed hardware?"
+      ],
+      "evidence": [
+        {
+          "source_id": "audi-asi-activation",
+          "claim": "ASI availability depends on activation status, separately from coding.",
+          "locator_hint": "TSB 2042506/2, pages 2–3"
+        }
+      ],
+      "writable": false,
+      "verified_on_target": false
+    },
+    {
+      "id": "mhs2-rhmi",
+      "name": "Smartphone_interface_for_rhmi",
+      "category": "Smartphone interface",
+      "kind": "adaptation",
+      "ecu": "5F",
+      "families": [
+        "MHS2"
+      ],
+      "platforms": [
+        "MLB evo"
+      ],
+      "status": "reported",
+      "verified_on_target": false,
+      "writable": false,
+      "summary": "This named field appears in a copied MHS2 smartphone-interface recipe. Its exact role and necessity for ASI are not established by an isolated test.",
+      "locator": {
+        "channel": "Vehicle configuration-Smartphone_interface_for_rhmi",
+        "did": null,
+        "byte": null,
+        "bit": null,
+        "mask": null
+      },
+      "reported_values": [
+        "ON"
+      ],
+      "prerequisites": [
+        "Compatible USB data socket and wiring; power or USB audio alone does not prove smartphone-interface compatibility.",
+        "Required feature entitlement and compatible head-unit software; coding is not evidence of license activation."
+      ],
+      "limitations": [
+        "No independent exact-MHS2 evidence for the previously suggested ENG138663 identifier was found.",
+        "A recipe grouping does not prove that rHMI is required for CarPlay or Android Auto."
+      ],
+      "verification_questions": [
+        "What exact label and identifier does the target export show?",
+        "Does this control remote HMI/Media Control, ASI transport, or another function on this software?"
+      ],
+      "evidence": [
+        {
+          "source_id": "deb-si52",
+          "claim": "The copied recipe lists Smartphone_interface_for_rhmi ON.",
+          "locator_hint": "#780"
+        }
+      ]
+    },
+    {
+      "id": "mhs2-external-media",
+      "name": "External-media connection selection",
+      "category": "USB and media",
+      "kind": "adaptation",
+      "ecu": "5F",
+      "families": [
+        "MHS2"
+      ],
+      "platforms": [
+        "MLB evo"
+      ],
+      "status": "reported",
+      "verified_on_target": false,
+      "writable": false,
+      "summary": "An MHS2 contributor reports that the external-media interface must include the connected socket; another owner enabled both connections without obtaining Android Auto.",
+      "locator": {
+        "channel": "Schnittstelle für externe Medien",
+        "did": null,
+        "byte": null,
+        "bit": null,
+        "mask": null
+      },
+      "reported_values": [
+        "first connection selected (reported)",
+        "connections 1 and 2 active (reported)"
+      ],
+      "prerequisites": [
+        "Compatible USB data socket and wiring; power or USB audio alone does not prove smartphone-interface compatibility.",
+        "Required feature entitlement and compatible head-unit software; coding is not evidence of license activation."
+      ],
+      "limitations": [
+        "The source gives a German UI group label, not an exact complete subchannel or encoding.",
+        "Numbered connections must not be equated with physical ports without target documentation."
+      ],
+      "verification_questions": [
+        "What are the exact external-media subchannels and current connection assignments on the target?"
+      ],
+      "evidence": [
+        {
+          "source_id": "deb-si53",
+          "claim": "Contributor asks that at least the first connection be selected.",
+          "locator_hint": "#784"
+        },
+        {
+          "source_id": "deb-talk62",
+          "claim": "Owner reports both external-media connections active but no Android Auto.",
+          "locator_hint": "#919"
+        }
+      ]
+    },
+    {
+      "id": "mhs2-usb-ipod",
+      "name": "USB / usb_ipod coding field",
+      "category": "USB and media",
+      "kind": "coding",
+      "ecu": "5F",
+      "families": [
+        "MHS2"
+      ],
+      "platforms": [
+        "MLB evo"
+      ],
+      "status": "conflicting",
+      "verified_on_target": false,
+      "writable": false,
+      "summary": "Owners report usb_ipod in byte 19, described either as bit 7 or bits 6–7. The available descriptions do not establish the complete field encoding.",
+      "locator": {
+        "channel": null,
+        "did": "0600",
+        "byte": 19,
+        "bit": null,
+        "mask": null
+      },
+      "reported_values": [
+        "bit 7 enabled (reported)",
+        "bits 6 and 7 both enabled (reported)",
+        "C0 (as written in a guide-derived report; numeric context unresolved)"
+      ],
+      "prerequisites": [
+        "Compatible USB data socket and wiring; power or USB audio alone does not prove smartphone-interface compatibility.",
+        "Required feature entitlement and compatible head-unit software; coding is not evidence of license activation."
+      ],
+      "limitations": [
+        "The descriptions may agree if bit 6 was already set; this is an encoding ambiguity, not proven contradictory behavior.",
+        "No whole-byte replacement or mask is approved. The previously suggested 44→C4 transition has no independent source for the user's unit.",
+        "USB 8W0035736 appears in a firsthand failure report despite USB music playback.",
+        "0600 enables offline raw comparison only; exact target field semantics remain unverified."
+      ],
+      "verification_questions": [
+        "What is the target's current byte 19 and diagnostic label for each upper-bit combination?",
+        "Is usb_ipod an enumerated two-bit field, and which unrelated bits must be preserved?",
+        "Does the exact USB socket and harness supply the required data path?"
+      ],
+      "evidence": [
+        {
+          "source_id": "deb-talk62",
+          "claim": "Copied description writes byte 19 bit 7 usb_ipod(C0).",
+          "locator_hint": "#916"
+        },
+        {
+          "source_id": "deb-si53",
+          "claim": "Contributor reports setting byte 19 bits 6 and 7 to 1 on an actual job.",
+          "locator_hint": "#781"
+        },
+        {
+          "source_id": "deb-usb21",
+          "claim": "usb_ipod coding coexisted with U11B8 and no USB media.",
+          "locator_hint": "#309"
+        },
+        {
+          "source_id": "aw-usb20",
+          "claim": "P2035 owner reports bits 6–7 during a successful hardware retrofit.",
+          "locator_hint": "#194"
+        },
+        {
+          "source_id": "vwflash-coding-record",
+          "claim": "Generic VAG coding-record address only; the forum supplies the candidate offset.",
+          "locator_hint": "data_records: 0x0600"
+        }
+      ]
+    },
+    {
+      "id": "mhs2-school-can",
+      "name": "Driving school CAN function",
+      "category": "Vehicle menus",
+      "kind": "adaptation",
+      "ecu": "5F",
+      "families": [
+        "MHS2"
+      ],
+      "platforms": [
+        "MLB evo"
+      ],
+      "status": "reported",
+      "verified_on_target": false,
+      "writable": false,
+      "summary": "Named setting from the original Q5 FY MHS2 driving-school-mode demonstration.",
+      "locator": {
+        "channel": "Car Function List CAN GEN2 - Driving School",
+        "did": null,
+        "byte": null,
+        "bit": null,
+        "mask": null
+      },
+      "reported_values": [
+        "active"
+      ],
+      "prerequisites": [
+        "Read-only identification and adaptation/coding export from the target unit."
+      ],
+      "limitations": [
+        "The source describes a Q5 FY; A4 support and raw field encoding are unverified.",
+        "Labels are preserved as displayed in the description; no invented IDE/ENG identifiers."
+      ],
+      "verification_questions": [
+        "Does the target expose the same named field and permitted value?",
+        "Does the target software support the driving-school display with its installed controls?"
+      ],
+      "evidence": [
+        {
+          "source_id": "mrfix-dsm",
+          "claim": "Car Function List CAN GEN2 - Driving School: active.",
+          "locator_hint": "original video description, 2021-12-02"
+        }
+      ]
+    },
+    {
+      "id": "mhs2-school-threshold",
+      "name": "Driving school menu threshold flag",
+      "category": "Vehicle menus",
+      "kind": "adaptation",
+      "ecu": "5F",
+      "families": [
+        "MHS2"
+      ],
+      "platforms": [
+        "MLB evo"
+      ],
+      "status": "reported",
+      "verified_on_target": false,
+      "writable": false,
+      "summary": "Named setting from the original Q5 FY MHS2 driving-school-mode demonstration.",
+      "locator": {
+        "channel": "Car Menu Operation - menu display driving school over threshold high",
+        "did": null,
+        "byte": null,
+        "bit": null,
+        "mask": null
+      },
+      "reported_values": [
+        "active"
+      ],
+      "prerequisites": [
+        "Read-only identification and adaptation/coding export from the target unit."
+      ],
+      "limitations": [
+        "The source describes a Q5 FY; A4 support and raw field encoding are unverified.",
+        "Labels are preserved as displayed in the description; no invented IDE/ENG identifiers."
+      ],
+      "verification_questions": [
+        "Does the target expose the same named field and permitted value?",
+        "Does the target software support the driving-school display with its installed controls?"
+      ],
+      "evidence": [
+        {
+          "source_id": "mrfix-dsm",
+          "claim": "Car Menu Operation - menu display driving school over threshold high: active.",
+          "locator_hint": "original video description, 2021-12-02"
+        }
+      ]
+    },
+    {
+      "id": "mhs2-school-menu",
+      "name": "Driving school menu visibility",
+      "category": "Vehicle menus",
+      "kind": "adaptation",
+      "ecu": "5F",
+      "families": [
+        "MHS2"
+      ],
+      "platforms": [
+        "MLB evo"
+      ],
+      "status": "reported",
+      "verified_on_target": false,
+      "writable": false,
+      "summary": "Named setting from the original Q5 FY MHS2 driving-school-mode demonstration.",
+      "locator": {
+        "channel": "Car Function Adaptations Gen2 - menu display driving school",
+        "did": null,
+        "byte": null,
+        "bit": null,
+        "mask": null
+      },
+      "reported_values": [
+        "activated"
+      ],
+      "prerequisites": [
+        "Read-only identification and adaptation/coding export from the target unit."
+      ],
+      "limitations": [
+        "The source describes a Q5 FY; A4 support and raw field encoding are unverified.",
+        "Labels are preserved as displayed in the description; no invented IDE/ENG identifiers."
+      ],
+      "verification_questions": [
+        "Does the target expose the same named field and permitted value?",
+        "Does the target software support the driving-school display with its installed controls?"
+      ],
+      "evidence": [
+        {
+          "source_id": "mrfix-dsm",
+          "claim": "Car Function Adaptations Gen2 - menu display driving school: activated.",
+          "locator_hint": "original video description, 2021-12-02"
+        }
+      ]
+    },
+    {
+      "id": "mhs2-school-bus",
+      "name": "Driving school message bus",
+      "category": "Vehicle menus",
+      "kind": "adaptation",
+      "ecu": "5F",
+      "families": [
+        "MHS2"
+      ],
+      "platforms": [
+        "MLB evo"
+      ],
+      "status": "reported",
+      "verified_on_target": false,
+      "writable": false,
+      "summary": "Named setting from the original Q5 FY MHS2 driving-school-mode demonstration.",
+      "locator": {
+        "channel": "Car Function List CAN GEN2 - Driving School msg bus",
+        "did": null,
+        "byte": null,
+        "bit": null,
+        "mask": null
+      },
+      "reported_values": [
+        "Databus infotainment"
+      ],
+      "prerequisites": [
+        "Read-only identification and adaptation/coding export from the target unit."
+      ],
+      "limitations": [
+        "The source describes a Q5 FY; A4 support and raw field encoding are unverified.",
+        "Labels are preserved as displayed in the description; no invented IDE/ENG identifiers."
+      ],
+      "verification_questions": [
+        "Does the target expose the same named field and permitted value?",
+        "Does the target software support the driving-school display with its installed controls?"
+      ],
+      "evidence": [
+        {
+          "source_id": "mrfix-dsm",
+          "claim": "Car Function List CAN GEN2 - Driving School msg bus: Databus infotainment.",
+          "locator_hint": "original video description, 2021-12-02"
+        }
+      ]
+    },
+    {
+      "id": "maps_pdc_standstill",
+      "name": "Parking display standstill condition",
+      "category": "Vehicle menus",
+      "kind": "adaptation",
+      "ecu": "5F",
+      "families": [
+        "generic_A4B9_MIB2"
+      ],
+      "platforms": [
+        "Audi A4 B9"
+      ],
+      "status": "reported",
+      "summary": "After map review, a B9 owner reports restored camera/parking display following a standstill-condition correction.",
+      "locator": {
+        "channel": "ENG122227-ENG117499-Car_Function_Adaptations_Gen2-menu_display_pdc_standstill",
+        "did": null,
+        "byte": null,
+        "bit": null,
+        "mask": null
+      },
+      "reported_values": [
+        "not activated"
+      ],
+      "prerequisites": [
+        "Compare original 5F map",
+        "Assess camera and parking dependencies separately"
+      ],
+      "limitations": [
+        "Unit part is only evidenced by an inaccessible attachment filename.",
+        "A later message reports a separate cluster-map problem; do not describe the entire car as resolved.",
+        "No readback or functional test on the target 8W0 035 193 G / MU0191 is available."
+      ],
+      "verification_questions": [
+        "Does the target ECU expose the same exact selector and enum in its own adaptation map?",
+        "Does readback and parked functional verification restore only the intended display?"
+      ],
+      "evidence": [
+        {
+          "source_id": "maps_src_camera_b9",
+          "claim": "Owner reports recovery after this correction.",
+          "locator_hint": "2024-04-06 map reply and following owner response"
+        }
+      ],
+      "writable": false,
+      "verified_on_target": false
+    },
+    {
+      "id": "maps_rs_monitor_mh2p",
+      "name": "RS Monitor recipe for MH2P only",
+      "category": "Vehicle menus",
+      "kind": "coding",
+      "ecu": "5F",
+      "families": [
+        "MH2P"
+      ],
+      "platforms": [
+        "Audi A4 B9 later infotainment"
+      ],
+      "status": "out_of_scope",
+      "summary": "The tutorial explicitly scopes this coding layout to MH2P.",
+      "locator": {
+        "channel": null,
+        "did": null,
+        "byte": 2,
+        "bit": null,
+        "mask": null
+      },
+      "reported_values": [
+        "bit 4 off; bit 5 on; bit 6 on; bit 7 off"
+      ],
+      "prerequisites": [],
+      "limitations": [
+        "No MHS2 applicability is claimed.",
+        "This exclusion is about the recipe, not a proof that every analogous feature is impossible."
+      ],
+      "verification_questions": [
+        "Confirm actual unit family; reject this byte layout for target MHS2."
+      ],
+      "evidence": [
+        {
+          "source_id": "maps_src_rs_monitor",
+          "claim": "Separate MH2P coding branch.",
+          "locator_hint": "For MIB2+ MH2P"
+        }
+      ],
+      "writable": false,
+      "verified_on_target": false
+    },
+    {
+      "id": "maps_rs_monitor_mib3",
+      "name": "RS Monitor recipe for MIB3 only",
+      "category": "Vehicle menus",
+      "kind": "coding",
+      "ecu": "5F",
+      "families": [
+        "MIB3"
+      ],
+      "platforms": [
+        "Audi A4 B9 later infotainment"
+      ],
+      "status": "out_of_scope",
+      "summary": "The same tutorial supplies a distinct MIB3 coding layout.",
+      "locator": {
+        "channel": null,
+        "did": null,
+        "byte": 5,
+        "bit": null,
+        "mask": null
+      },
+      "reported_values": [
+        "bit 0 on; bit 1 off"
+      ],
+      "prerequisites": [],
+      "limitations": [
+        "A different byte layout is documented for a different family.",
+        "No MHS2 compatibility evidence."
+      ],
+      "verification_questions": [
+        "Do not merge this with the MH2P or MHS2 codec."
+      ],
+      "evidence": [
+        {
+          "source_id": "maps_src_rs_monitor",
+          "claim": "Separate MIB3 coding branch.",
+          "locator_hint": "For MIB3"
+        }
+      ],
+      "writable": false,
+      "verified_on_target": false
+    },
+    {
+      "id": "maps_vps_function",
+      "name": "VPS BAP function flag differs by configuration",
+      "category": "Vehicle menus",
+      "kind": "adaptation",
+      "ecu": "5F",
+      "families": [
+        "generic_A4B9_MIB2"
+      ],
+      "platforms": [
+        "Audi A4 B9"
+      ],
+      "status": "conflicting",
+      "summary": "A B9 camera troubleshooting case disables this flag; another B9 configuration map lists it active.",
+      "locator": {
+        "channel": "ENG122229-ENG117712-Car_Function_List_BAP_Gen2-VPS_0x0B",
+        "did": null,
+        "byte": null,
+        "bit": null,
+        "mask": null
+      },
+      "reported_values": [
+        "not activated: camera troubleshooting case",
+        "activated: separate US configuration"
+      ],
+      "prerequisites": [
+        "Identify camera variant and existing 6C/09 integration"
+      ],
+      "limitations": [
+        "Neither inspected source establishes exact target MHS2 identity.",
+        "No readback or functional test on the target 8W0 035 193 G / MU0191 is available."
+      ],
+      "verification_questions": [
+        "Which camera integration mode does the target actually use?"
+      ],
+      "evidence": [
+        {
+          "source_id": "maps_src_camera_b9",
+          "claim": "Specific troubleshooting instruction disables VPS.",
+          "locator_hint": "2024-04-06 opening reply"
+        },
+        {
+          "source_id": "maps_src_audiworld_map",
+          "claim": "Separate map lists active VPS.",
+          "locator_hint": "#475"
+        }
+      ],
+      "writable": false,
+      "verified_on_target": false
+    },
+    {
+      "id": "maps_vps_bus",
+      "name": "VPS BAP message-bus configuration conflict",
+      "category": "Vehicle menus",
+      "kind": "adaptation",
+      "ecu": "5F",
+      "families": [
+        "generic_A4B9_MIB2"
+      ],
+      "platforms": [
+        "Audi A4 B9"
+      ],
+      "status": "conflicting",
+      "summary": "The same camera case disables the VPS bus entry, while a different B9 map uses Terminal 15.",
+      "locator": {
+        "channel": "ENG122229-ENG117713-Car_Function_List_BAP_Gen2-VPS_0x0B_msg_bus",
+        "did": null,
+        "byte": null,
+        "bit": null,
+        "mask": null
+      },
+      "reported_values": [
+        "not activated: camera case",
+        "Terminal 15: separate US map"
+      ],
+      "prerequisites": [
+        "Known camera variant and working bus integration"
+      ],
+      "limitations": [
+        "Not a universal enable sequence.",
+        "No readback or functional test on the target 8W0 035 193 G / MU0191 is available."
+      ],
+      "verification_questions": [
+        "What bus/availability combination matches the actual camera topology?"
+      ],
+      "evidence": [
+        {
+          "source_id": "maps_src_camera_b9",
+          "claim": "Bus entry is disabled in this case.",
+          "locator_hint": "2024-04-06 opening reply"
+        },
+        {
+          "source_id": "maps_src_audiworld_map",
+          "claim": "Different map uses Terminal 15.",
+          "locator_hint": "#475"
+        }
+      ],
+      "writable": false,
+      "verified_on_target": false
+    },
+    {
+      "id": "maps_bulk_configuration_conflict",
+      "name": "Bulk copying regional vehicle configuration failed",
+      "category": "Verification",
+      "kind": "procedure",
+      "ecu": "5F",
+      "families": [
+        "generic_A4B9_MIB2"
+      ],
+      "platforms": [
+        "Audi A4 B9"
+      ],
+      "status": "conflicting",
+      "summary": "An original US B9 owner reports lost online/navigation behavior after trying another market configuration.",
+      "locator": {
+        "channel": null,
+        "did": null,
+        "byte": null,
+        "bit": null,
+        "mask": null
+      },
+      "reported_values": [],
+      "prerequisites": [],
+      "limitations": [
+        "No exact MHS2 family identity.",
+        "The source supports individual comparison rather than treating a complete map as a transferable preset."
+      ],
+      "verification_questions": [
+        "Which individual channel serves the intended behavior, and what are its hardware/region dependencies?"
+      ],
+      "evidence": [
+        {
+          "source_id": "maps_src_audiworld_map",
+          "claim": "Owner rejects wholesale adoption of the Canadian settings.",
+          "locator_hint": "#473 and #474"
+        }
+      ],
+      "writable": false,
+      "verified_on_target": false
+    },
+    {
+      "id": "maps_map_export",
+      "name": "Capture exact 5F adaptation and raw maps",
+      "category": "Verification",
+      "kind": "procedure",
+      "ecu": "5F",
+      "families": [
+        "generic_UDS"
+      ],
+      "platforms": [
+        "Audi A4 B9; protocol-level guidance"
+      ],
+      "status": "documented",
+      "summary": "VCDS can export controller maps; Raw Hex and readable CSV serve different purposes.",
+      "locator": {
+        "channel": null,
+        "did": null,
+        "byte": null,
+        "bit": null,
+        "mask": null
+      },
+      "reported_values": [],
+      "prerequisites": [
+        "Correct ASAM/ROD support",
+        "Appropriate supported diagnostic interface"
+      ],
+      "limitations": [
+        "Readable named-channel CSV alone is not the documented raw restore format.",
+        "Mapping is not proof of every channel being writable."
+      ],
+      "verification_questions": [
+        "Capture 5F identity, named adaptation map, raw map and unchanged coding before evaluating candidates."
+      ],
+      "evidence": [
+        {
+          "source_id": "maps_src_ross_map",
+          "claim": "Vendor documents map generation and distinct adphex restoration prerequisites.",
+          "locator_hint": "Controller Channels Map"
+        }
+      ],
+      "writable": false,
+      "verified_on_target": false
+    },
+    {
+      "id": "mhi2-toolbox-exclusion",
+      "name": "Harman M.I.B. toolbox family exclusion",
+      "category": "Verification",
+      "kind": "procedure",
+      "ecu": "5F",
+      "families": [
+        "MHI2",
+        "MHI2Q"
+      ],
+      "platforms": [
+        "Audi A4 B9"
+      ],
+      "status": "out_of_scope",
+      "summary": "The original M.I.B. project states Harman MHI2/MHI2Q scope; it is not a Delphi MHS2 procedure.",
+      "locator": {
+        "channel": null,
+        "did": null,
+        "byte": null,
+        "bit": null,
+        "mask": null
+      },
+      "reported_values": [],
+      "prerequisites": [],
+      "limitations": [
+        "No toolbox scripts or firmware payloads are included."
+      ],
+      "verification_questions": [
+        "Reject a Harman recipe unless the actual installed family is independently established."
+      ],
+      "evidence": [
+        {
+          "source_id": "mib-scope",
+          "claim": "Supported-family boundary in original project documentation.",
+          "locator_hint": "README supported units"
+        }
+      ],
+      "writable": false,
+      "verified_on_target": false
+    },
+    {
+      "id": "maps_uds_name_semantics",
+      "name": "Named UDS channel labels are not numeric channel addresses",
+      "category": "Verification",
+      "kind": "procedure",
+      "ecu": "5F",
+      "families": [
+        "generic_UDS"
+      ],
+      "platforms": [
+        "UDS/ODX/ASAM controllers"
+      ],
+      "status": "documented",
+      "summary": "Ross-Tech distinguishes named UDS data objects from legacy numbered adaptation channels.",
+      "locator": {
+        "channel": null,
+        "did": null,
+        "byte": null,
+        "bit": null,
+        "mask": null
+      },
+      "reported_values": [],
+      "prerequisites": [],
+      "limitations": [
+        "An IDE/ENG label alone does not provide a wire-level DID, byte layout or codec."
+      ],
+      "verification_questions": [
+        "Require separately evidenced DID and encoding before implementing transport-level writes."
+      ],
+      "evidence": [
+        {
+          "source_id": "maps_src_ross_adaptation",
+          "claim": "UDS adaptation uses named dropdown entries rather than traditional channel numbers.",
+          "locator_hint": "UDS paragraph"
+        }
+      ],
+      "writable": false,
+      "verified_on_target": false
+    }
+  ]
+}

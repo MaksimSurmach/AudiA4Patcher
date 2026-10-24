@@ -3,6 +3,48 @@
 Research date: 2026-10-24. These sources establish protocol/data starting points;
 none establishes successful operation on this user's actual car.
 
+## MHS2 research catalog
+
+The separate [research library](../audi_workbench/data/mhs2_library.json) contains
+**54 entries, 38 source records and 13 categories**. Of these entries, 35
+explicitly name MHS2; the rest preserve generic, inferred-family or incompatible
+evidence. Status counts are 8 documented observations/rules, 33 reported claims,
+6 conflicts/ambiguities and 7 out-of-scope records. There are **zero target-verified
+features and zero writable library entries**. Counts describe review inputs,
+not independent confirmations or a complete factory dataset.
+
+Claim-level references include original Digital Eliteboard MHS2 discussions,
+A4 Klub owner reports and scans, AudiWorld and Audi-Sport owner reports,
+CarTechnology audio cases, mr-fix creator descriptions, Ross-Tech documentation,
+Audi manufacturer bulletins and original project documentation. See each
+source's `access`, identity evidence, notes and independence information.
+
+The catalog preserves these distinctions:
+
+- A public `8W0 035 193 G / MU0191` scan and a separate `P0470 / MU0191` report
+  support identity research; they are not one complete adaptation map.
+- USB byte-19 descriptions leave the complete encoding unresolved. Setting
+  bit 7 and requiring bits 6–7 can agree when bit 6 was already set.
+- Named Apple_DIO/Google_GAL/rHMI settings have hardware and activation
+  dependencies; successful USB audio or an accepted setting is not ASI proof.
+- A reported dashboard group `0B5A` has no verified individual field codec.
+  Dataset locations such as `0x003000` remain dataset locations.
+- Camera reports include unchanged defaults; sound and display reports include
+  failures. Configuration-dependent outcomes are retained.
+- MHI2 toolboxes, MH2P/MIB3 RS Monitor and legacy 3G/RMC channels are explicitly
+  separated from MHS2 candidates.
+
+Some AudiWorld/CarTechnology/Ross-Tech material was available only as indexed
+excerpts; blocked maps were not reconstructed. YouTube descriptions were read,
+not the video footage. The historical a4b9.ro translated PDF now redirects to
+unrelated content and is retained only as a failed research lead. It is not
+primary support or a download recommendation.
+
+The named adaptation CSV comparison is documented in [LIBRARY.md](LIBRARY.md).
+The complete follow-up audit instructions are in [CODEX_VERIFY.md](CODEX_VERIFY.md).
+
+## Protocol and transport references
+
 | Decision | Source | Scope and limitation |
 |---|---|---|
 | 5F 773/7DD, 19 710/77A | https://github.com/ConnorHowell/vag-uds-ids | Author-extracted ODIS CAN ID table; confirm installed ECU by live identity |

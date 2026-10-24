@@ -93,6 +93,7 @@ async def test_scan_filter_and_select_exact_device_without_connecting(tmp_path, 
         await finish(app, pilot)
         assert app.query_one("#device-address", Input).value == "uuid-two"
         assert app.query_one("#tabs", TabbedContent).active == "capture-tab"
+        assert app.focused is app.query_one("#ecu")
         assert len(scans) == 1
         assert wb.link.kind == "ble"
         assert wb.link.device == "uuid-two"
@@ -161,6 +162,7 @@ async def test_scan_empty_or_error_returns_to_usable_offline_state(tmp_path, mon
         assert not app.query_one("#scan", Button).disabled
         assert app.query_one("#capture", Button).disabled
         assert app.last_error == ("Bluetooth permission denied" if failure else None)
+        assert app.focused is app.query_one("#scan", Button)
 
 
 async def test_active_scan_ignores_duplicate_scan_and_source_switch(tmp_path, monkeypatch):
@@ -266,6 +268,7 @@ async def test_snapshot_picker_and_record_search_preserve_selected_record(tmp_pa
         assert not app.query_one("#enable-writes", Checkbox).value
         assert app.query_one("#confirmation", Input).value == ""
         assert app.query_one("#tabs", TabbedContent).active == "explore-tab"
+        assert app.focused is app.query_one("#raw-table", DataTable)
         app.query_one("#record-filter", Input).value = "D100"
         await pilot.pause()
         records = app.query_one("#raw-table", DataTable)
@@ -412,3 +415,97 @@ async def test_help_and_escape_are_available_without_trapping_navigation(tmp_pat
         await pilot.press("escape")
         assert search.value == ""
         assert app.focused is app.query_one("#device-table", DataTable)
+
+
+async def test_resize_with_help_open_keeps_controls_reachable_when_help_closes(tmp_path):
+    app = tui.WorkbenchApp(Workbench(Store(tmp_path), Dictionary.load()))
+    async with app.run_test(size=(120, 40)) as pilot:
+        await pilot.press("f7", "?")
+        assert len(app.screen_stack) == 2
+        await pilot.resize_terminal(60, 24)
+        await pilot.press("escape", "/")
+        search = app.query_one("#library-filter", Input)
+        assert app.focused is search
+        await pilot.press("tab")
+        family = app.query_one("#library-family")
+        assert app.focused is family
+        await pilot.press("tab")
+        category = app.query_one("#library-category")
+        assert app.focused is category
+        assert category.region.y > family.region.y
+        await pilot.press("tab")
+        status = app.query_one("#library-status")
+        assert app.focused is status
+        assert status.region.y > category.region.y
+
+
+async def test_filtered_tables_retain_record_identity_and_show_keyboard_focus(tmp_path):
+    wb, first_snapshot = await captured_workbench(tmp_path)
+    async with wb:
+        await wb.capture()
+    app = tui.WorkbenchApp(wb)
+    async with app.run_test(size=(100, 36)) as pilot:
+        app._load_snapshot(first_snapshot)
+        app._devices = [
+            {"name": "Synthetic other", "address": "synthetic-other", "service_uuids": []},
+            {"name": "Synthetic adapter one", "address": "synthetic-one", "service_uuids": []},
+            {"name": "Synthetic adapter two", "address": "synthetic-two", "service_uuids": []},
+        ]
+        app._show_devices()
+        features = app.query_one("#feature-table", DataTable)
+        field_key = next(row.key.value for row in features.ordered_rows
+                         if features.get_row(row.key)[0] == "D100")
+        cases = (
+            ("f1", "device-table", "device-filter", "synthetic-two", "adapter"),
+            ("f2", "snapshot-table", "snapshot-filter", str(first_snapshot), first_snapshot.name),
+            ("f3", "raw-table", "record-filter", "D100", "D100"),
+            ("f3", "feature-table", "record-filter", field_key, "D100"),
+            ("f5", "dictionary-table", "dictionary-filter", "demo.display", "demo"),
+        )
+        for view, table_id, search_id, key, query in cases:
+            await pilot.press(view)
+            table = app.query_one(f"#{table_id}", DataTable)
+            search = app.query_one(f"#{search_id}", Input)
+            table.move_cursor(row=table.get_row_index(key))
+            table.focus()
+            await pilot.pause()
+            focused_style = table.get_component_rich_style("datatable--cursor")
+            search.focus()
+            search.value = query
+            await pilot.pause()
+            assert table.coordinate_to_cell_key(table.cursor_coordinate).row_key.value == key
+            assert table.get_component_rich_style("datatable--cursor").bgcolor != focused_style.bgcolor
+            await pilot.press("enter")
+            assert app.focused is app.query_one(f"#{app.SEARCH_TARGETS[app.query_one('#tabs').active][1]}")
+            search.value = ""
+            await pilot.pause()
+            assert table.coordinate_to_cell_key(table.cursor_coordinate).row_key.value == key
+
+
+async def test_dictionary_action_uses_the_inspected_row_and_empty_filter_clears_details(tmp_path):
+    wb, _ = await captured_workbench(tmp_path)
+    app = tui.WorkbenchApp(wb)
+    async with app.run_test(size=(100, 36)) as pilot:
+        await pilot.press("f5")
+        table = app.query_one("#dictionary-table", DataTable)
+        table.move_cursor(row=table.get_row_index("demo.display"))
+        await pilot.pause()
+        assert "demo.display" in app.query_one("#dictionary-detail", Static).content
+        search = app.query_one("#dictionary-filter", Input)
+        search.value = "demo"
+        await pilot.pause()
+        assert app._selected_entry == "demo.display"
+        await click(pilot, "#use-entry")
+        await finish(app, pilot)
+        assert app.query_one("#entry", Input).value == "demo.display"
+        assert app.query_one("#tabs", TabbedContent).active == "change-tab"
+        assert app.focused is app.query_one("#entry", Input)
+
+        await pilot.press("f5")
+        search.value = "nothing matches this definition"
+        await pilot.pause()
+        assert table.row_count == 0
+        assert not table.show_cursor
+        assert app._selected_entry is None
+        assert "No matching definitions" in app.query_one("#dictionary-detail", Static).content
+        assert "demo.display" not in app.query_one("#dictionary-detail", Static).content

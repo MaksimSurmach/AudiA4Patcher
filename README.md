@@ -22,8 +22,8 @@ uv run --locked audi-a4-patcher                                  # TUI, starts a
 uv run --locked audi-a4-patcher --data-dir ./demo-first --demo   # simulator, no Bluetooth
 ```
 
-The six sections are Devices, Capture, Explore, Changes, Dictionary and Evidence
-(**F1–F6**; **/** searches, **?** opens help). Selecting a Bluetooth device does
+The seven sections are Devices, Capture, Explore, Changes, Dictionary, Evidence
+and Library (**F1–F7**; **/** searches, **?** opens help). Selecting a Bluetooth device does
 not connect; each online operation opens the adapter and closes it afterwards.
 Workflows and shortcuts: [TUI guide](docs/TUI_GUIDE.md).
 
@@ -62,6 +62,28 @@ paced. `--only` skips dictionary defaults; `--dtc` reads trouble codes without
 clearing them.
 
 ## Dictionaries
+
+**The MHS2 research library is included.** Open **Library (F7)** or run
+`uv run --locked audi-a4-patcher library --query Apple_DIO`. It contains sourced
+adaptation names, coding claims, original reports, conflicting recipes and
+explicit other-family exclusions. Every entry records its evidence and missing
+verification. Research entries are non-executable; they do not authorize writes
+or automatically expand the capture set.
+
+![MHS2 research library with family, category and evidence filters](docs/library-preview.png)
+
+```bash
+uv run --locked audi-a4-patcher library --family MHS2
+uv run --locked audi-a4-patcher library --status conflicting
+uv run --locked audi-a4-patcher library --snapshot SNAPSHOT.json --map ./adp-5F.csv --output ./review.json
+```
+
+Comparison preserves observed bytes and named CSV values while leaving actual
+feature state unverified. Read the [library guide](docs/LIBRARY.md) and use the
+[ready-to-paste Codex verification prompt](docs/CODEX_VERIFY.md) to review every
+claim against original sources and the exact ECU.
+
+### Executable read/write definitions
 
 Definitions live in [audi_workbench/data/default.json](audi_workbench/data/default.json)
 (`audi-a4-patcher dictionary` prints them). Unknown fields stay unknown. Byte
@@ -117,6 +139,7 @@ capture/collection/raw run, 130 interrupted.
 | `raw --ecu K REQ ...` | yes | Explicit read-only requests in one session |
 | `list` | no | Snapshots, plans, transactions, exports, newest first |
 | `inspect` / `diff` / `dictionary` | no | Decode, compare, show definitions |
+| `library [--query ...] [--snapshot ...] [--map ...]` | no | Search research and compare local evidence; never grants write permission |
 | `plan` / `restore` | no | Preview a change; never writes |
 | `reconcile` | yes | Read-only check after an uncertain write |
 | `apply` | yes | One guarded write; a person runs it on a real car |
@@ -134,8 +157,10 @@ $A inspect SNAPSHOT.json
 ReadDTCInformation, and OBD `01`/`09`. Anything else, including session
 changes, SecurityAccess, routines, resets, DTC clearing and writes, is refused
 before the adapter is opened. Each request gets its own result (`ok`, `response`,
-`data` or `nrc`/`error`); a negative answer does not stop the run, broken
-framing or a lost link does (`stopped: true`). Requests are at most 7 bytes on
+`data` or `nrc`/`error`); ordinary negative answers do not stop the run. Unresolved
+NRC `78`, broken framing or a lost link does (`stopped: true`, exit 4), including
+on the sole or last request. OBD `09` replies must echo the requested PID.
+Requests are at most 7 bytes on
 BLE. Raw results are printed, not saved as snapshots; the trace keeps the
 traffic. For repeatable evidence prefer `capture --did`, which saves a snapshot
 that `inspect`, `diff` and `plan` can use.
@@ -171,7 +196,7 @@ kept for reconciliation; there are no automatic retries or rollbacks.
 | Long incoming responses | ISO-TP assembly with length and sequence checks |
 | Long outgoing coding writes | **Blocked** |
 | SecurityAccess-protected writes | Not implemented |
-| CarPlay activation | No verified Apple_DIO mapping |
+| CarPlay / adaptation research | Named claims and source comparison included; no verified target wire-level codec or activation procedure |
 | Firmware/EEPROM recovery | Not implemented |
 
 ELM327 `CAF1` permits seven UDS request bytes here, so a long `0600` value can be

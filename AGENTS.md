@@ -17,6 +17,12 @@ Workbench.apply. Default read-only. Do not add automatic retries of writes, blin
 SecurityAccess guessing, resets, flashing, DTC clearing, or arbitrary raw write UI.
 No MQB-to-MLB coding byte guesses. Unknown means unknown.
 
+The research catalog (library/v1) is passive evidence, separate from executable
+dictionary/v1 permissions. Never promote a forum status, family match, named CSV
+observation or IDE/ENG identifier into a verified feature or wire-level address.
+Preserve source access/lineage, failed outcomes and unresolved encoding. Library
+browsing and comparison must remain offline and must not expand automatic reads.
+
 Keep exact raw identities and provenance. A snapshot is a partial configuration
 snapshot, not an EEPROM/flash recovery image. Readable does not imply writable.
 Byte/bit numbering is zero-based, bit 0 is LSB.

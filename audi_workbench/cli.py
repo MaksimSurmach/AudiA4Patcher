@@ -12,6 +12,7 @@ from types import SimpleNamespace
 
 from . import __version__
 from .dictionary import SCHEMA, Dictionary
+from .library import STATUSES
 from .model import ECUS, IDENTITY_DIDS, SafetyError, WorkbenchError, parse_hex
 from .service import Workbench
 from .store import Store, now
@@ -103,10 +104,22 @@ def parser() -> argparse.ArgumentParser:
     commands.add_parser("list", help="List saved snapshots, plans, transactions and exports in the data directory")
     commands.add_parser("export", help="Create a local support ZIP with raw logs and snapshots (includes VIN)")
     commands.add_parser("dictionary", help="Show dictionary entries and their evidence/permissions")
+    library = commands.add_parser("library", help="Search coding research or compare local evidence; never connects")
+    library.add_argument("--file", type=Path, help="Alternative research library JSON; not a write dictionary")
+    library.add_argument("--query", default="", help="Search names, channel IDs, locators and source text")
+    library.add_argument("--entry", help="Show one research entry and all its source references")
+    library.add_argument("--category", help="Filter by category")
+    library.add_argument("--status", choices=STATUSES)
+    library.add_argument("--family", help="Filter explicit families, e.g. MHS2")
+    library.add_argument("--ecu", help="Filter ECU address, e.g. 5F")
+    library.add_argument("--snapshot", type=Path, help="Compare a saved snapshot offline")
+    library.add_argument("--map", type=Path, dest="adaptation_map", help="Compare a local VCDS adaptation CSV")
+    library.add_argument("--output", type=Path, help="Save JSON to a new private file; never overwrite")
     template = commands.add_parser("dictionary-template", help="Draft read-only unknown entries from a snapshot")
     template.add_argument("snapshot", type=Path)
     template.add_argument("--output", type=Path, required=True, help="New JSON file; existing files are never overwritten")
-    commands.add_parser("tui", help="Open the terminal interface; supports offline inspection too")
+    tui = commands.add_parser("tui", help="Open the terminal interface; supports offline inspection too")
+    tui.add_argument("--library", type=Path, help="Alternative research catalog for the Library view")
     return result
 
 
@@ -244,12 +257,16 @@ def draft_dictionary(snapshot_path: Path | str, output: Path | str, dictionary: 
     Dictionary(entries)
     document = {"schema": SCHEMA, "created_at": now(), "source_snapshot_sha256": snapshot["sha256"],
                 "entries": entries}
+    return _write_new_json(document, output)
+
+
+def _write_new_json(document: dict, output: Path | str, *, allow_nan: bool = True) -> Path:
     path = Path(output).expanduser().resolve()
     path.parent.mkdir(parents=True, exist_ok=True, mode=0o700)
     fd = os.open(path, os.O_CREAT | os.O_EXCL | os.O_WRONLY, 0o600)
     try:
         with os.fdopen(fd, "w", encoding="utf-8") as stream:
-            json.dump(document, stream, indent=2, ensure_ascii=False)
+            json.dump(document, stream, indent=2, ensure_ascii=False, allow_nan=allow_nan)
             stream.write("\n")
             stream.flush()
             os.fsync(stream.fileno())
@@ -284,6 +301,31 @@ def main(argv: list[str] | None = None) -> int:
             if not 1 <= args.timeout <= 60:
                 raise WorkbenchError("Scan timeout must be between 1 and 60 seconds")
             emit({"devices": asyncio.run(scan_devices(args.timeout))})
+            return 0
+        if args.command == "library":
+            from .library import CodingLibrary, read_adaptation_map
+            library = CodingLibrary.load(args.file)
+            entries = ([library.entry(args.entry)] if args.entry else
+                       library.search(args.query, category=args.category, status=args.status,
+                                      family=args.family, ecu=args.ecu))
+            if args.snapshot or args.adaptation_map:
+                result = library.assess(
+                    snapshot=Store.read(args.snapshot) if args.snapshot else None,
+                    adaptation_map=read_adaptation_map(args.adaptation_map) if args.adaptation_map else None,
+                    entries=entries,
+                )
+            elif args.entry:
+                result = library.detail(args.entry)
+            else:
+                result = {"schema": library.document()["schema"], "summary": library.summary(),
+                          "matched": len(entries), "entries": entries,
+                          "sources": list(library.sources.values()),
+                          "notice": "Research only; these entries do not authorize reads or writes."}
+            if args.output:
+                output = _write_new_json(result, args.output, allow_nan=False)
+                emit({"artifact": str(output), "uploaded": False, "writable": False})
+            else:
+                emit(result)
             return 0
         dictionary = Dictionary.load(args.dictionary)
         store = Store(args.data_dir)
@@ -325,7 +367,11 @@ def main(argv: list[str] | None = None) -> int:
                 from .tui import run_tui
             except ImportError as exc:
                 raise WorkbenchError("TUI dependencies are missing. Run: uv sync --locked") from exc
-            run_tui(wb)
+            if getattr(args, "library", None) is None:
+                run_tui(wb)
+            else:
+                from .library import CodingLibrary
+                run_tui(wb, library=CodingLibrary.load(args.library))
         elif args.command == "raw":
             result = asyncio.run(_online(wb, args))
             emit(result)

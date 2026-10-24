@@ -6,6 +6,7 @@ from pathlib import Path
 from typing import ClassVar
 
 from rich.text import Text
+from textual import events
 from textual.app import App, ComposeResult
 from textual.binding import Binding
 from textual.containers import Horizontal, VerticalScroll
@@ -26,6 +27,7 @@ from textual.widgets import (
 )
 
 from .cli import hex_did
+from .library import STATUSES, CodingLibrary
 from .model import ECUS, WorkbenchError
 from .simulator import DemoLink
 from .store import Store
@@ -51,16 +53,22 @@ class HelpScreen(ModalScreen):
                 "F3  Explore      Search decoded fields and raw records\n"
                 "F4  Changes      Preview, confirm, restore or reconcile a change\n"
                 "F5  Dictionary   Search definitions, read evidence and select an entry\n"
-                "F6  Evidence     Export a support ZIP and inspect session events\n\n"
+                "F6  Evidence     Export a support ZIP and inspect session events\n"
+                "F7  Library      Research MHS2 candidates, sources and open questions\n\n"
                 "/       Focus the current view's search\n"
                 "Esc     Clear search and return to its table\n"
+                "Enter   From a search input, focus its results\n"
                 "Tab     Move between controls; Shift+Tab goes back\n"
-                "Arrows  Move through rows; Enter selects a row\n"
+                "Arrows  Move through rows; Enter selects or opens details\n"
+                "PgUp/Dn Scroll tables or focused Library details\n"
                 "?       Open this guide\n"
                 "Ctrl+Q  Quit when no operation is running\n\n"
                 "Text inputs keep normal typing, including /, ? and q.\n"
                 "Selecting a device does not connect. Each diagnostic operation\n"
                 "opens its own connection, then closes it.\n"
+                "The bright table cursor marks keyboard focus. A muted row keeps\n"
+                "your place while another control has focus.\n"
+                "Library evidence describes candidates, never the current vehicle state.\n"
                 "Dictionary labels show evidence; unknown values remain unknown.", markup=False)
             yield Button("Close help", id="close-help", variant="primary")
 
@@ -82,6 +90,7 @@ class WorkbenchApp(App):
         Binding("f4", "view('change-tab')", "Changes", priority=True),
         Binding("f5", "view('dictionary-tab')", "Dictionary", priority=True),
         Binding("f6", "view('evidence-tab')", "Evidence", priority=True),
+        Binding("f7", "view('library-tab')", "Library", priority=True),
         Binding("slash", "focus_search", "Search", key_display="/"),
         Binding("escape", "clear_search", show=False),
         Binding("question_mark", "show_help", "Help", key_display="?"),
@@ -93,6 +102,7 @@ class WorkbenchApp(App):
         "capture-tab": ("snapshot-filter", "snapshot-table"),
         "explore-tab": ("record-filter", "raw-table"),
         "dictionary-tab": ("dictionary-filter", "dictionary-table"),
+        "library-tab": ("library-filter", "library-table"),
     }
     EDIT_CONTEXT: ClassVar = ("snapshot", "entry", "target-did", "edit-byte", "edit-bit",
                               "edit-value", "edit-hex", "plan-file")
@@ -111,21 +121,34 @@ class WorkbenchApp(App):
     .section { color: #72c8dd; text-style: bold; margin: 1 0; }
     .hint { color: #9aaec2; height: auto; margin-bottom: 1; }
     Input { background: #172535; border: tall #3b5167; }
+    Input:focus, Select:focus > SelectCurrent { border: tall #72c8dd; }
     Button { background: #233e54; }
     Button.-primary { background: #0b7d91; }
     Button.-warning { background: #885218; }
-    DataTable { background: #152230; height: 12; margin-bottom: 1; }
+    DataTable { background: #152230; height: 12; margin-bottom: 1; border: tall #3b5167; }
+    DataTable:focus { border: tall #72c8dd; }
+    DataTable > .datatable--cursor { background: #31485e; color: #e4ebf4; }
+    DataTable:focus > .datatable--cursor { background: #72c8dd; color: #102331; text-style: bold; }
+    DataTable > .datatable--hover { background: #264358; }
     #feature-table { height: 15; }
     #capture-note, #snapshot-note, #plan-preview { height: auto; padding: 1; background: #172535; }
     #plan-preview { min-height: 5; max-height: 16; overflow-y: auto; margin-bottom: 1; }
     #logs { height: 1fr; min-height: 10; background: #0e151e; }
-    #dictionary-table { height: 14; }
+    #dictionary-table, #library-table { height: 14; }
     #device-table { height: 10; }
     #snapshot-table { height: 9; }
     #device-note, #dictionary-detail { height: auto; padding: 1; background: #172535; }
     #dictionary-detail { min-height: 4; margin-bottom: 1; }
-    #device-count, #snapshot-count, #record-count, #dictionary-count { height: auto; color: #9aaec2; }
+    #device-count, #snapshot-count, #record-count, #dictionary-count, #library-count { height: auto; color: #9aaec2; }
     #dictionary-ecu { width: 22; }
+    #library-detail-scroll { height: 18; min-height: 8; border: tall #3b5167; background: #172535; }
+    #library-detail-scroll:focus { border: tall #72c8dd; }
+    #library-detail { height: auto; padding: 1; }
+    .narrow TabPane { padding: 0 1; }
+    .narrow .row { layout: vertical; }
+    .narrow .row > Input, .narrow .row > Select, .narrow .row > Button { width: 1fr; margin-right: 0; }
+    .narrow #dictionary-ecu { width: 1fr; }
+    .narrow #library-table { height: 10; }
     HelpScreen { align: center middle; background: #000000 65%; }
     #help-dialog { width: 90%; max-width: 88; height: auto; max-height: 90%;
                    padding: 1 2; border: round #72c8dd; background: #172535; }
@@ -134,9 +157,10 @@ class WorkbenchApp(App):
     Checkbox { margin-bottom: 1; }
     """
 
-    def __init__(self, workbench):
+    def __init__(self, workbench, library: CodingLibrary | None = None):
         super().__init__()
         self.workbench = workbench
+        self.library = library if library is not None else CodingLibrary.load()
         self.busy = False
         self.snapshot_path: Path | None = None
         self.plan_path: Path | None = None
@@ -149,7 +173,10 @@ class WorkbenchApp(App):
         self._saved_snapshots: list[tuple[Path, str, str, str]] = []
         self._snapshot: dict | None = None
         self._selected_entry: str | None = None
+        self._selected_library: str | None = None
         self._plan_context: tuple | None = None
+        self._operation_focus: str | None = None
+        self._pending_focus: str | None = None
 
     @property
     def mode(self) -> str:
@@ -168,7 +195,7 @@ class WorkbenchApp(App):
             with TabPane("Devices", id="devices-tab"), VerticalScroll():
                 yield Label("Choose a data source", classes="section")
                 yield Static("Scan nearby Bluetooth devices and press Enter on the adapter row (usually IOS-Vlink). "
-                             "F1–F6 switch views; / searches; Enter selects; ? opens help.", classes="hint")
+                             "F1–F7 switch views; / searches; Enter selects; ? opens help.", classes="hint")
                 with Horizontal(classes="row"):
                     yield Button("Scan Bluetooth", variant="primary", id="scan")
                     yield Button("Simulator", id="simulator")
@@ -269,6 +296,32 @@ class WorkbenchApp(App):
                 yield Static("Exports stay on this computer and include unredacted VIN/serial numbers and raw logs.", classes="hint")
                 yield Label("Live session events", classes="section")
                 yield RichLog(id="logs", wrap=True, highlight=False, markup=False, max_lines=2000)
+            with TabPane("Library", id="library-tab"), VerticalScroll():
+                yield Label("MHS2 research library", classes="section")
+                yield Static("Browse reported coding and adaptation candidates. Evidence status describes the "
+                             "sources, not a confirmed vehicle feature or current enabled state. "
+                             "Library entries cannot authorize writes.", classes="hint", markup=False)
+                yield Input(placeholder="Search name, channel, DID, source or limitation", id="library-filter")
+                with Horizontal(classes="row"):
+                    yield Select([("All families", "*")] + [
+                        (family, family) for family in sorted({family for entry in self.library.entries
+                                                              for family in entry["families"]})
+                    ], value="*", allow_blank=False, id="library-family")
+                    yield Select([("All categories", "*")] + [
+                        (category.replace("_", " "), category)
+                        for category in sorted({entry["category"] for entry in self.library.entries})
+                    ], value="*", allow_blank=False, id="library-category")
+                    yield Select([("All evidence statuses", "*")] + [
+                        (status.replace("_", " "), status)
+                        for status in STATUSES
+                    ], value="*", allow_blank=False, id="library-status")
+                yield Static("", id="library-count", markup=False)
+                yield DataTable(id="library-table", cursor_type="row")
+                yield Static("Arrows inspect candidates. Enter focuses details; Page Up/Down scrolls. "
+                             "Esc clears search and returns to the table. Filters remain as selected.", classes="hint")
+                with VerticalScroll(id="library-detail-scroll"):
+                    yield Static("Select a candidate to see its evidence and verification questions.",
+                                 id="library-detail", markup=False)
         yield Static("Ready", id="status", markup=False)
         yield Footer()
 
@@ -280,7 +333,13 @@ class WorkbenchApp(App):
         self.query_one("#dictionary-table", DataTable).add_columns("DID", "Name", "ECU", "Knowledge", "Access")
         self.query_one("#device-table", DataTable).add_columns("Name", "Address / UUID", "RSSI", "Services")
         self.query_one("#snapshot-table", DataTable).add_columns("ECU", "Mode", "Coverage", "Saved snapshot")
+        library_table = self.query_one("#library-table", DataTable)
+        library_table.add_column("Candidate / topic", width=36)
+        library_table.add_column("Evidence", width=14)
+        library_table.add_column("Category", width=20)
+        library_table.add_column("ECU", width=5)
         self._show_dictionary()
+        self._show_library()
         self._refresh_snapshots()
         self._set_busy(False)
         self.set_interval(0.25, self._tail_trace)
@@ -292,6 +351,10 @@ class WorkbenchApp(App):
         if self.workbench.link and self.workbench.link.kind == "ble":
             self.query_one("#device-address", Input).value = getattr(self.workbench.link, "device", "")
         self._ui_ready = True
+
+    def on_resize(self, event: events.Resize):
+        for screen in self.screen_stack:
+            screen.set_class(event.size.width < 80, "narrow")
 
     def _input(self, key: str) -> str:
         return self.query_one(f"#{key}", Input).value.strip()
@@ -314,12 +377,32 @@ class WorkbenchApp(App):
         self.query_one("#logs", RichLog).write(Text(text))
 
     def _set_busy(self, value: bool):
+        if value and not self.busy:
+            self._operation_focus = self.focused.id if self.focused is not None else None
+            self.set_focus(None)
         self.busy = value
         for control in self.query("Button, Input, Select, Checkbox, DataTable"):
             control.disabled = value
         if not value and self.workbench.link is None:
             for key in ("capture", "apply", "reconcile"):
                 self.query_one(f"#{key}", Button).disabled = True
+        if not value:
+            target = self._pending_focus or self._operation_focus
+            self._pending_focus = self._operation_focus = None
+            if target:
+                self.call_after_refresh(self._focus_control, target)
+
+    def _focus_control(self, control_id: str):
+        if self.busy:
+            self._pending_focus = control_id
+            return
+        for control in self.query(f"#{control_id}"):
+            pane = next((ancestor for ancestor in control.ancestors if isinstance(ancestor, TabPane)), None)
+            if pane is not None and pane.id != self.query_one("#tabs", TabbedContent).active:
+                return
+            if not control.disabled:
+                self.set_focus(control)
+            break
 
     def on_button_pressed(self, event: Button.Pressed):
         self._start_operation(str(event.button.id), str(event.button.label))
@@ -399,9 +482,12 @@ class WorkbenchApp(App):
                     raise WorkbenchError("Open a first snapshot")
                 result = wb.diff(self.snapshot_path, self._path("diff-path"))
                 table = self.query_one("#diff-table", DataTable)
+                cursor_key = self._cursor_key(table)
                 table.clear()
                 for row in result.get("rows", []):
-                    table.add_row(str(row.get("did", "")), str(row.get("before_hex", "")), str(row.get("after_hex", "")))
+                    did = str(row.get("did", ""))
+                    table.add_row(did, str(row.get("before_hex", "")), str(row.get("after_hex", "")), key=did)
+                self._restore_cursor(table, cursor_key)
                 self._status(result.get("warning") or f"Compared {len(result.get('rows', []))} differing records")
             elif action == "preview":
                 if not self._input("snapshot"):
@@ -493,14 +579,18 @@ class WorkbenchApp(App):
         snapshot = self._snapshot
         query = self._input("record-filter").casefold()
         decoded = self.workbench.dictionary.decode(snapshot)
-        rows = [row for row in decoded if self._matches_query(query, row)]
-        matched_dids = {row["did"] for row in rows}
+        rows = [(index, row) for index, row in enumerate(decoded) if self._matches_query(query, row)]
+        matched_dids = {row["did"] for _, row in rows}
         table = self.query_one("#feature-table", DataTable)
+        cursor_key = self._cursor_key(table)
         table.clear()
-        for row in rows:
+        for index, row in rows:
+            key = f"{row.get('did')}:{row.get('entry_id')}:{row.get('field')}:{index}"
             table.add_row(str(row.get("did", "")), Text(str(row.get("field") or row.get("name", ""))),
-                          str(row.get("status", "unknown")), Text(str(row.get("value", ""))))
+                          str(row.get("status", "unknown")), Text(str(row.get("value", ""))), key=key)
+        self._restore_cursor(table, cursor_key)
         table = self.query_one("#raw-table", DataTable)
+        cursor_key = self._cursor_key(table)
         table.clear()
         for did, record in snapshot.get("records", {}).items():
             if query and did not in matched_dids and not self._matches_query(query, {"did": did, **record}):
@@ -508,6 +598,7 @@ class WorkbenchApp(App):
             raw = record.get("hex", "")
             table.add_row(did, "OK" if record.get("ok") else "FAILED", str(len(raw) // 2),
                           Text(raw if record.get("ok") else str(record.get("error", "Unavailable"))), key=did)
+        self._restore_cursor(table, cursor_key)
         self.query_one("#record-count", Static).update(
             f"{table.row_count} of {len(snapshot.get('records', {}))} records · {len(rows)} decoded field rows")
 
@@ -545,9 +636,26 @@ class WorkbenchApp(App):
     def _matches_query(query: str, value: dict) -> bool:
         return not query or query in json.dumps(value, ensure_ascii=False).casefold()
 
+    @staticmethod
+    def _cursor_key(table: DataTable) -> str | None:
+        if not table.is_valid_coordinate(table.cursor_coordinate):
+            return None
+        return table.coordinate_to_cell_key(table.cursor_coordinate).row_key.value
+
+    @staticmethod
+    def _restore_cursor(table: DataTable, key: str | None) -> str | None:
+        """Keep the same record through filtering, or choose the first remaining row."""
+        table.show_cursor = bool(table.row_count)
+        if not table.row_count:
+            return None
+        row = table.get_row_index(key) if key is not None and key in table.rows else 0
+        table.move_cursor(row=row, column=0, animate=False)
+        return table.coordinate_to_cell_key(table.cursor_coordinate).row_key.value
+
     def _show_devices(self):
         query = self._input("device-filter").casefold()
         table = self.query_one("#device-table", DataTable)
+        cursor_key = self._cursor_key(table)
         table.clear()
         for device in self._devices:
             if self._matches_query(query, device):
@@ -555,6 +663,7 @@ class WorkbenchApp(App):
                               _device_cell(device["address"]), _device_cell(device.get("rssi", "?")),
                               _device_cell(", ".join(device.get("service_uuids", []))),
                               key=device["address"])
+        self._restore_cursor(table, cursor_key)
         self.query_one("#device-count", Static).update(
             f"{table.row_count} of {len(self._devices)} devices" if self._devices else
             "No devices found. Check Bluetooth permission and adapter power, then scan again.")
@@ -580,19 +689,20 @@ class WorkbenchApp(App):
     def _show_snapshots(self):
         query = self._input("snapshot-filter").casefold()
         table = self.query_one("#snapshot-table", DataTable)
+        cursor_key = self._cursor_key(table)
         table.clear()
         for path, ecu, mode, coverage in self._saved_snapshots:
             if self._matches_query(query, {"file": path.name, "ecu": ecu, "mode": mode}):
                 table.add_row(ecu, mode, coverage, path.name, key=str(path))
+        self._restore_cursor(table, cursor_key)
         self.query_one("#snapshot-count", Static).update(
             f"{table.row_count} of {len(self._saved_snapshots)} saved snapshots · newest first")
 
     def _show_dictionary(self):
         query = self._input("dictionary-filter").casefold()
         ecu = self.query_one("#dictionary-ecu", Select).value
-        self._selected_entry = None
-        self.query_one("#dictionary-detail", Static).update("Select a definition to see fields and evidence.")
         table = self.query_one("#dictionary-table", DataTable)
+        cursor_key = self._cursor_key(table)
         table.clear()
         for entry in self.workbench.dictionary.entries:
             if ecu != "*" and entry["ecu"] not in ("*", ecu):
@@ -603,8 +713,90 @@ class WorkbenchApp(App):
                     permission = "simulator only" if entry.get("origin") == "demo" else "reviewed write"
                 table.add_row(entry["did"], Text(entry["name"]), entry["ecu"], entry["confidence"],
                               permission, key=entry["id"])
+        self._selected_entry = self._restore_cursor(table, cursor_key)
+        if self._selected_entry is None:
+            self.query_one("#dictionary-detail", Static).update(
+                "No matching definitions. Clear the search or choose another ECU.")
+        else:
+            self._show_entry(self._selected_entry)
         self.query_one("#dictionary-count", Static).update(
-            f"{table.row_count} of {len(self.workbench.dictionary.entries)} definitions · Enter selects")
+            f"{table.row_count} of {len(self.workbench.dictionary.entries)} definitions · arrows inspect · Enter selects")
+
+    def _show_library(self):
+        family = self.query_one("#library-family", Select).value
+        category = self.query_one("#library-category", Select).value
+        status = self.query_one("#library-status", Select).value
+        entries = self.library.search(self._input("library-filter"),
+                                      family=None if family == "*" else str(family),
+                                      category=None if category == "*" else str(category),
+                                      status=None if status == "*" else str(status))
+        table = self.query_one("#library-table", DataTable)
+        cursor_key = self._cursor_key(table)
+        table.clear()
+        for entry in entries:
+            table.add_row(Text(entry["name"]), entry["status"].replace("_", " "),
+                          Text(entry["category"].replace("_", " ")), entry["ecu"], key=entry["id"])
+        selected = self._restore_cursor(table, cursor_key)
+        if selected is None:
+            self._selected_library = None
+            self.query_one("#library-detail", Static).update(
+                "No matching research candidates. Clear the search or choose All categories / All evidence statuses.")
+        else:
+            self._show_library_entry(selected)
+        self.query_one("#library-count", Static).update(
+            f"{table.row_count} of {len(self.library.entries)} research topics · "
+            f"{len(self.library.sources)} sources · no confirmed vehicle state")
+
+    def _show_library_entry(self, entry_id: str):
+        detail = self.library.detail(entry_id)
+        entry = detail["entry"]
+        descriptions = {
+            "documented": "documented in cited material; vehicle applicability still needs verification",
+            "reported": "reported by a source; exact vehicle and software must be checked",
+            "conflicting": "claims or variants differ; resolve the disagreement before drawing conclusions",
+            "out_of_scope": "related background outside the intended MHS2 coding scope",
+        }
+        lines = [f"{entry['name']} · {entry['id']}",
+                 f"Evidence: {entry['status'].replace('_', ' ')} · {descriptions[entry['status']]}",
+                 "Vehicle state: not established by this library.",
+                 f"Kind: {entry['kind']} · ECU: {entry['ecu']} · Category: {entry['category']}",
+                 "Families: " + ", ".join(entry["families"]),
+                 "Platforms: " + ", ".join(entry["platforms"]),
+                 "", entry["summary"], "", "Reported locator (unknown stays unknown):",
+                 "  Byte and bit indices start at 0; bit 0 is the least significant bit."]
+        for name in ("channel", "did", "byte", "bit", "mask"):
+            value = entry["locator"].get(name)
+            if name == "mask" and value is not None:
+                value = f"0x{value:02X}"
+            lines.append(f"  {name.upper() if name == 'did' else name.capitalize()}: "
+                         f"{value if value is not None else 'unknown'}")
+        for title, field in (("Reported values", "reported_values"), ("Prerequisites", "prerequisites"),
+                             ("Limitations", "limitations"), ("Verification questions", "verification_questions")):
+            lines.extend(("", title + ":"))
+            values = entry[field]
+            lines.extend(f"  • {value}" for value in values)
+            if not values:
+                lines.append("  Not specified by the available evidence.")
+        lines.extend(("", "Sources and the claims they support:"))
+        for source in detail["sources"]:
+            lines.extend((f"  [{source['id']}] {source['title']}",
+                          f"  {source['url']}", f"  Kind: {source['kind']} · Access: {source['access']}"))
+            for label, field in (("Family evidence", "family_evidence"), ("Identity evidence", "identity_evidence"),
+                                 ("Independence group", "independence_group"), ("Notes", "notes")):
+                if value := source.get(field):
+                    text = json.dumps(value, ensure_ascii=False) if isinstance(value, (dict, list)) else str(value)
+                    lines.append(f"  {label}: {text}")
+            for evidence in entry["evidence"]:
+                if evidence["source_id"] == source["id"]:
+                    lines.append("  Claim: " + evidence["claim"])
+                    if evidence.get("locator_hint"):
+                        lines.append("  Source location: " + evidence["locator_hint"])
+            lines.append("")
+        lines.append("Research only. This entry is not a write definition and cannot enable or apply a change.")
+        self.query_one("#library-detail", Static).update("\n".join(lines))
+        if entry_id != self._selected_library:
+            self.query_one("#library-detail-scroll", VerticalScroll).scroll_home(animate=False)
+        self._selected_library = entry_id
 
     def _show_entry(self, entry_id: str):
         entry = self.workbench.dictionary.entry(entry_id)
@@ -642,22 +834,44 @@ class WorkbenchApp(App):
         if self.busy:
             return
         handlers = {"device-filter": self._show_devices, "snapshot-filter": self._show_snapshots,
-                    "record-filter": self._show_records, "dictionary-filter": self._show_dictionary}
+                    "record-filter": self._show_records, "dictionary-filter": self._show_dictionary,
+                    "library-filter": self._show_library}
         if handler := handlers.get(event.input.id):
             handler()
 
     def on_select_changed(self, event: Select.Changed):
-        if self._ui_ready and not self.busy and event.select.id == "dictionary-ecu":
+        if not self._ui_ready or self.busy:
+            return
+        if event.select.id == "dictionary-ecu":
             self._show_dictionary()
+        elif event.select.id in ("library-family", "library-category", "library-status"):
+            self._show_library()
+
+    def on_input_submitted(self, event: Input.Submitted):
+        if self.busy:
+            return
+        tab = self.query_one("#tabs", TabbedContent).active
+        target = self.SEARCH_TARGETS.get(tab)
+        if target and event.input.id == target[0]:
+            self.query_one(f"#{target[1]}", DataTable).focus()
 
     def on_data_table_row_highlighted(self, event: DataTable.RowHighlighted):
-        if self._ui_ready and not self.busy and event.data_table.id == "dictionary-table":
-            self._show_entry(str(event.row_key.value))
+        if (not self._ui_ready or self.busy
+                or event.row_key.value != self._cursor_key(event.data_table)):
+            return
+        key = str(event.row_key.value)
+        if event.data_table.id == "dictionary-table":
+            self._selected_entry = key
+            self._show_entry(key)
+        elif event.data_table.id == "library-table":
+            self._show_library_entry(key)
 
     def on_data_table_row_selected(self, event: DataTable.RowSelected):
         if self.busy:
             return
         key = str(event.row_key.value)
+        if key not in event.data_table.rows:
+            return
         if event.data_table.id == "device-table":
             self.query_one("#device-address", Input).value = key
             self._start_operation("use-device", "Use device")
@@ -666,6 +880,10 @@ class WorkbenchApp(App):
             self._start_operation("inspect", "Open snapshot")
         elif event.data_table.id == "dictionary-table":
             self._select_entry(key)
+        elif event.data_table.id == "library-table":
+            self._show_library_entry(key)
+            self.query_one("#library-detail-scroll", VerticalScroll).focus()
+            self._status(f"Research topic: {key}. Sources describe a candidate, not a confirmed vehicle state.")
         elif event.data_table.id == "raw-table":
             self._invalidate_plan()
             self.query_one("#target-did", Input).value = key
@@ -699,15 +917,19 @@ class WorkbenchApp(App):
         self.set_focus(None)
         self.query_one("#tabs", TabbedContent).active = tab
         focus = {"devices-tab": "device-table", "capture-tab": "ecu", "explore-tab": "raw-table",
-                 "change-tab": "entry", "dictionary-tab": "dictionary-table", "evidence-tab": "export"}
-        self.query_one(f"#{focus[tab]}").focus()
+                 "change-tab": "entry", "dictionary-tab": "dictionary-table", "evidence-tab": "export",
+                 "library-tab": "library-table"}
+        if self.busy:
+            self._pending_focus = focus[tab]
+        else:
+            self.call_after_refresh(self._focus_control, focus[tab])
 
     def action_focus_search(self):
         tab = self.query_one("#tabs", TabbedContent).active
         if target := self.SEARCH_TARGETS.get(tab):
             self.query_one(f"#{target[0]}", Input).focus()
         else:
-            self.notify("Search is available in Devices, Capture, Explore and Dictionary.")
+            self.notify("Search is available in Devices, Capture, Explore, Dictionary and Library.")
 
     def action_clear_search(self):
         tab = self.query_one("#tabs", TabbedContent).active
@@ -728,5 +950,5 @@ class WorkbenchApp(App):
         self.action_safe_quit()
 
 
-def run_tui(workbench):
-    WorkbenchApp(workbench).run()
+def run_tui(workbench, library: CodingLibrary | None = None):
+    WorkbenchApp(workbench, library=library).run()

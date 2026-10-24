@@ -13,17 +13,31 @@ Audi A4 Patcher uses Textual for its English terminal interface. Launch it with
 | F4 | Changes |
 | F5 | Dictionary |
 | F6 | Evidence |
+| F7 | Library |
 | / | Focus the current section's search, when a text input is not active |
-| Esc | Clear the active search or return focus |
+| Esc | Clear the current search and return to its table; family/category/ECU/status filters stay selected |
 | ? | Open keyboard help, outside text inputs |
 | Tab / Shift+Tab | Move between controls |
-| Arrow keys / Enter | Navigate and select table rows or controls |
+| Arrow keys | Move the table cursor; left/right also reveal columns outside the viewport |
+| Enter | From a search input, focus results; from a row, select it or open Library details |
+| Page Up / Page Down | Scroll a table or the focused Library details panel |
 | Ctrl+Q / Ctrl+C | Request exit; an active operation is allowed to finish first |
 
 Mouse selection also works. Scroll within a section to reach controls below
 its visible area. The status line reports the current action, result or error.
 On Macs configured to use the top-row keys for media controls, hold Fn when
-using F1-F6, or use the tabs with the mouse.
+using F1-F7, or use the tabs with the mouse.
+
+The bright cyan row and table border identify keyboard focus. A muted cursor
+keeps your place while you type in another control. Filtering retains the same
+record when it remains in the results; otherwise the first matching row becomes
+current. An empty result set clears the cursor and details. Search fields keep
+normal typing, including `/`, `?` and `q`.
+
+Function keys move focus into the chosen view. After an operation finishes,
+focus returns to its control or to the result view. At narrow terminal widths,
+rows of inputs and buttons stack vertically; use Tab and Shift+Tab to reach
+controls below the viewport.
 
 ## Choose the source
 
@@ -85,6 +99,50 @@ uv run --locked audi-a4-patcher --dictionary ./my-mhs2-dictionary.json
 ```
 
 For the schema and provenance requirements, read [DICTIONARY.md](DICTIONARY.md).
+
+## Research MHS2 candidates
+
+**Library (F7)** is an offline research catalog for MHS2 coding, adaptations and
+related procedures. It searches names, reported channels and DIDs, source
+metadata, limitations and verification questions. Combine the search with a
+family, category and evidence-status filters to narrow the table. Choose MHS2
+for explicitly scoped entries. The All options remove individual filters;
+Esc clears only the search text. `tui --library FILE` uses the same browser for
+another catalog with the research-library schema.
+
+Move the cursor to inspect a candidate. Press Enter to focus its details panel,
+then use arrows or Page Up/Page Down to read the full evidence. Tab and
+Shift+Tab move between the table and panel. Esc returns to the table. Each
+detail includes:
+
+- The claimed ECU, software family and platform scope.
+- Reported locators and values, with unknown DIDs, bytes, bits and masks left
+  explicitly unknown.
+- Prerequisites, limitations and questions that remain to be checked on the
+  exact vehicle.
+- Source titles, URLs, access coverage, family/identity evidence and the
+  specific claims they support. Available source notes and independence groups
+  preserve failed-access limits and shared evidence lineage.
+
+Evidence statuses describe the available sources:
+
+| Status | Meaning in the Library |
+|---|---|
+| documented | The cited material documents the claim; applicability to this vehicle still needs verification. |
+| reported | A source reports the behavior or setting; verify the exact hardware and software variant. |
+| conflicting | Claims or variants differ, and the disagreement remains unresolved. |
+| out of scope | Related background outside the intended MHS2 coding scope. |
+
+These statuses do not say whether a feature is currently enabled, installed or
+supported in the vehicle. A forum label, IDE/ENG channel name or internal dataset
+address does not establish a UDS DID or a coding byte. Source access is shown as
+`full`, `excerpt` or `blocked` so the limits of the evidence remain visible.
+
+Browsing and selecting a Library candidate never opens the diagnostic link,
+changes the write editor, or prepares or applies a plan. A research entry cannot
+authorize a write. Use **Explore** for values actually captured from a snapshot
+and **Dictionary** for the separate definitions used by decoding and guarded
+planning.
 
 ## Prepare and apply a change
 

@@ -20,6 +20,7 @@ Explicit CLI subcommands and `python -m audi_workbench` remain available.
 | `dictionary.py` | Validated declarative definitions, field decoding and writable masks |
 | `store.py` | Atomic artifacts, integrity hashes, process lock, durable traces, local export |
 | `service.py` | Capture, edit plans, preflight, one-shot write/readback, restore and reconciliation |
+| `library.py` | Offline research schema, search, named CSV import and observation reports; no transport access |
 | `cli.py` / `tui.py` | User controls over the same service; no alternative write path; `cli.py` also drafts read-only dictionary candidates |
 
 The application has no server, cloud API, telemetry or background vehicle polling.
@@ -29,8 +30,10 @@ External dictionaries contain data only; no Python expressions or commands run.
 ## Terminal workspace
 
 Textual provides tab navigation, keyboard bindings, tables, filtering and the
-worker lifecycle. The six sections are Devices, Capture, Explore, Changes,
-Dictionary and Evidence. UI actions use the same Workbench service as the CLI.
+worker lifecycle. The sections are Devices, Capture, Explore, Changes,
+Dictionary, Evidence and Library. Diagnostic UI actions use the same Workbench
+service as the CLI. Research browsing and comparison stay entirely offline and
+never change the executable dictionary or its read/write permissions.
 
 Discovery lists advertised BLE identities without opening a diagnostic session.
 Selecting a discovered row uses its exact address/UUID; a manual unique name is
